@@ -4,6 +4,9 @@ services:
     build:
       context: ../../
       dockerfile: script/docker/schedule.Dockerfile
+    depends_on:
+      jaeger:
+        condition: service_started
     networks:
       - bot-net
   jaeger:

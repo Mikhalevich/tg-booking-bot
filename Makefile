@@ -11,13 +11,16 @@ LINTER_VERSION := v1.60.2
 all: build
 
 build:
-	go build -mod=vendor -o $(BIN_PATH)/bot ./cmd/schedule/main.go
+	go build -mod=vendor -o $(BIN_PATH)/schedule ./cmd/schedule/main.go
 
 test:
 	go test ./...
 
 compose-up:
 	docker-compose -f ./script/docker/docker-compose.yml up --build
+
+compose-down:
+	docker-compose -f ./script/docker/docker-compose.yml down
 
 vendor:
 	go mod tidy
