@@ -10,43 +10,49 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 )
 
-type Scheduler interface {
-	GetAllTemplates(ctx context.Context, info port.MessageInfo) error
+type tgbot struct {
+	bot    *bot.Bot
+	logger logger.Logger
 }
 
-type tgbot struct {
-	logger    logger.Logger
-	scheduler Scheduler
+type TextHandlerFunc func(ctx context.Context, info port.MessageInfo) error
+
+type Register interface {
+	AddExactTextRoute(pattern string, handler TextHandlerFunc)
 }
+
+type RouteRegisterFunc func(register Register)
 
 func Start(
 	ctx context.Context,
 	b *bot.Bot,
 	logger logger.Logger,
-	scheduler Scheduler,
+	routesRegisterFn RouteRegisterFunc,
 ) error {
 	tbot := &tgbot{
-		logger:    logger,
-		scheduler: scheduler,
+		bot:    b,
+		logger: logger,
 	}
 
-	b.RegisterHandler(
-		bot.HandlerTypeMessageText,
-		"/getalltemplates",
-		bot.MatchTypeExact,
-		tbot.handlerWrapper(tbot.scheduler.GetAllTemplates),
-	)
+	routesRegisterFn(tbot)
 
 	b.Start(ctx)
 
 	return nil
 }
 
-type processorFunc func(ctx context.Context, info port.MessageInfo) error
+func (t *tgbot) AddExactTextRoute(pattern string, handler TextHandlerFunc) {
+	t.bot.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		pattern,
+		bot.MatchTypeExact,
+		t.wrapTextHandler(handler),
+	)
+}
 
-func (t *tgbot) handlerWrapper(processor processorFunc) bot.HandlerFunc {
+func (t *tgbot) wrapTextHandler(handler TextHandlerFunc) bot.HandlerFunc {
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		if err := processor(ctx, port.MessageInfo{
+		if err := handler(ctx, port.MessageInfo{
 			MessageID: update.Message.ID,
 			ChatID:    update.Message.Chat.ID,
 			Text:      update.Message.Text,

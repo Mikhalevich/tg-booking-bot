@@ -49,10 +49,10 @@ func runService(cfg config.ScheduleBot, log logger.Logger) error {
 
 	log.Info("starting bot")
 
-	if err := infra.StartBotApp(
+	if err := infra.StartScheduleBot(
 		ctx,
 		b,
-		log.WithField("bot_name", "scheduler"),
+		log.WithField("bot_name", "schedule"),
 		scheduleProcessor,
 	); err != nil {
 		return fmt.Errorf("start bot: %w", err)

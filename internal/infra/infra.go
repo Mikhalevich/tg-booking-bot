@@ -53,7 +53,7 @@ func MakeScheduler(b *bot.Bot) tgbot.Scheduler {
 	)
 }
 
-func StartBotApp(
+func StartScheduleBot(
 	ctx context.Context,
 	b *bot.Bot,
 	logger logger.Logger,
@@ -63,7 +63,7 @@ func StartBotApp(
 		ctx,
 		b,
 		logger,
-		scheduler,
+		tgbot.ScheduleRoutes(scheduler),
 	); err != nil {
 		return fmt.Errorf("start bot: %w", err)
 	}
