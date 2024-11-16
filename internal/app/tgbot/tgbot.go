@@ -2,36 +2,56 @@ package tgbot
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 )
 
-type tgbot struct {
+type Scheduler interface {
+	GetAllTemplates(ctx context.Context, info port.MessageInfo) error
 }
 
-func Start(ctx context.Context, token string) error {
-	tbot := &tgbot{}
+type tgbot struct {
+	logger    logger.Logger
+	scheduler Scheduler
+}
 
-	opts := []bot.Option{
-		bot.WithDefaultHandler(tbot.handler),
+func Start(
+	ctx context.Context,
+	b *bot.Bot,
+	logger logger.Logger,
+	scheduler Scheduler,
+) error {
+	tbot := &tgbot{
+		logger:    logger,
+		scheduler: scheduler,
 	}
 
-	b, err := bot.New(token, opts...)
-	if err != nil {
-		return fmt.Errorf("creating bot with options: %w", err)
-	}
+	b.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/getalltemplates",
+		bot.MatchTypeExact,
+		tbot.handlerWrapper(tbot.scheduler.GetAllTemplates),
+	)
 
 	b.Start(ctx)
 
 	return nil
 }
 
-func (t *tgbot) handler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	//nolint:errcheck
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   update.Message.Text,
-	})
+type processorFunc func(ctx context.Context, info port.MessageInfo) error
+
+func (t *tgbot) handlerWrapper(processor processorFunc) bot.HandlerFunc {
+	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		if err := processor(ctx, port.MessageInfo{
+			MessageID: update.Message.ID,
+			ChatID:    update.Message.Chat.ID,
+			Text:      update.Message.Text,
+		}); err != nil {
+			t.logger.WithError(err).Error("error while processing message")
+		}
+	}
 }
