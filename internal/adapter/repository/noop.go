@@ -6,6 +6,8 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
+var _ port.ScheduleRepository = (*noop)(nil)
+
 type noop struct {
 }
 
