@@ -5,5 +5,7 @@ import (
 )
 
 type MessageSender interface {
-	Reply(ctx context.Context, chatID int64, replyToMsgID int, text string) error
+	ReplyText(ctx context.Context, chatID int64, replyToMsgID int, text string) error
+	ReplyTextMarkdown(ctx context.Context, chatID int64, replyToMsgID int, text string) error
+	EscapeMarkdown(s string) string
 }

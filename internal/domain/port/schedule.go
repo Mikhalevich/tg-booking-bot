@@ -18,6 +18,27 @@ const (
 	Sun
 )
 
+func (d DayOfWeek) String() string {
+	switch d {
+	case Mon:
+		return "Monday"
+	case Tue:
+		return "Tuesday"
+	case Wed:
+		return "Wednesday"
+	case Thu:
+		return "Thursday"
+	case Fri:
+		return "Friday"
+	case Sat:
+		return "Saturday"
+	case Sun:
+		return "Sunday"
+	default:
+		return "Invalid"
+	}
+}
+
 type Time struct {
 	Hour   int
 	Minute int
@@ -43,12 +64,24 @@ func (t Time) Validate() error {
 	return nil
 }
 
+func (t Time) String() string {
+	return fmt.Sprintf("%d:%02d", t.Hour, t.Minute)
+}
+
 type TimeInterval struct {
 	Start Time
 	End   Time
 }
 
 func (ti TimeInterval) Validate() error {
+	if err := ti.Start.Validate(); err != nil {
+		return fmt.Errorf("ivalid start time: %w", err)
+	}
+
+	if err := ti.End.Validate(); err != nil {
+		return fmt.Errorf("invalid end time: %w", err)
+	}
+
 	if !ti.End.After(ti.Start) {
 		return errors.New("start time greater than end time")
 	}
@@ -57,11 +90,12 @@ func (ti TimeInterval) Validate() error {
 }
 
 type HoursByDay struct {
-	Day   DayOfWeek
+	Days  []DayOfWeek
 	Hours []TimeInterval
 }
 
 type Schedule struct {
+	ID           string
 	WorkingHours []HoursByDay
 }
 

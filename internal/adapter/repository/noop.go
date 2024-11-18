@@ -15,6 +15,81 @@ func NewNoop() *noop {
 	return &noop{}
 }
 
+//nolint:funlen
 func (n *noop) GetAllTemplates(ctx context.Context) ([]port.Schedule, error) {
-	return nil, nil
+	return []port.Schedule{
+		{
+			ID: "test_schedule_1",
+			WorkingHours: []port.HoursByDay{
+				{
+					Days: []port.DayOfWeek{port.Mon, port.Tue, port.Wed, port.Thu, port.Fri},
+					Hours: []port.TimeInterval{
+						{
+							Start: port.Time{
+								Hour: 8,
+							},
+							End: port.Time{
+								Hour: 12,
+							},
+						},
+						{
+							Start: port.Time{
+								Hour: 13,
+							},
+							End: port.Time{
+								Hour: 17,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			ID: "test_schedule_2",
+			WorkingHours: []port.HoursByDay{
+				{
+					Days: []port.DayOfWeek{port.Mon, port.Wed},
+					Hours: []port.TimeInterval{
+						{
+							Start: port.Time{
+								Hour: 8,
+							},
+							End: port.Time{
+								Hour: 12,
+							},
+						},
+						{
+							Start: port.Time{
+								Hour: 13,
+							},
+							End: port.Time{
+								Hour: 17,
+							},
+						},
+					},
+				},
+				{
+					Days: []port.DayOfWeek{port.Fri},
+					Hours: []port.TimeInterval{
+						{
+							Start: port.Time{
+								Hour: 8,
+							},
+							End: port.Time{
+								Hour: 12,
+							},
+						},
+						{
+							Start: port.Time{
+								Hour: 13,
+							},
+							End: port.Time{
+								Hour: 16,
+							},
+						},
+					},
+				},
+			},
+		},
+	}, nil
 }
