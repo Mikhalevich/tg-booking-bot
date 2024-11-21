@@ -3,11 +3,9 @@ package messagesender
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
-	"github.com/go-telegram/ui/paginator"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
@@ -55,19 +53,4 @@ func (m *messageSender) ReplyTextMarkdown(ctx context.Context, chatID int64, rep
 
 func (m *messageSender) EscapeMarkdown(s string) string {
 	return bot.EscapeMarkdown(s)
-}
-
-func (m *messageSender) SendPaginator(ctx context.Context, chatID int64, data []string) error {
-	opts := []paginator.Option{
-		paginator.PerPage(1),
-		paginator.WithCloseButton("Close"),
-	}
-
-	p := paginator.New(m.bot, data, opts...)
-
-	if _, err := p.Show(ctx, m.bot, strconv.Itoa(int(chatID))); err != nil {
-		return fmt.Errorf("show paginator: %w", err)
-	}
-
-	return nil
 }
