@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/app/tgbot"
 	"github.com/Mikhalevich/tg-booking-bot/internal/config"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
@@ -38,12 +37,28 @@ func runService(cfg config.ScheduleBot, log logger.Logger) error {
 		return fmt.Errorf("setup tracer: %w", err)
 	}
 
+	b, err := infra.MakeBotAPI(cfg.Bot.Token)
+	if err != nil {
+		return fmt.Errorf("make bot api: %w", err)
+	}
+
+	scheduleProcessor, cleanup, err := infra.MakeScheduler(b, cfg.Postgres)
+	if err != nil {
+		return fmt.Errorf("make scheduler: %w", err)
+	}
+	defer cleanup()
+
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	log.Info("starting bot")
 
-	if err := tgbot.Start(ctx, cfg.Bot.Token); err != nil {
+	if err := infra.StartScheduleBot(
+		ctx,
+		b,
+		log.WithField("bot_name", "schedule"),
+		scheduleProcessor,
+	); err != nil {
 		return fmt.Errorf("start bot: %w", err)
 	}
 

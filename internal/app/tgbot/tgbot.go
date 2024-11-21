@@ -2,36 +2,62 @@ package tgbot
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 )
 
 type tgbot struct {
+	bot    *bot.Bot
+	logger logger.Logger
 }
 
-func Start(ctx context.Context, token string) error {
-	tbot := &tgbot{}
+type TextHandlerFunc func(ctx context.Context, info port.MessageInfo) error
 
-	opts := []bot.Option{
-		bot.WithDefaultHandler(tbot.handler),
+type Register interface {
+	AddExactTextRoute(pattern string, handler TextHandlerFunc)
+}
+
+type RouteRegisterFunc func(register Register)
+
+func Start(
+	ctx context.Context,
+	b *bot.Bot,
+	logger logger.Logger,
+	routesRegisterFn RouteRegisterFunc,
+) error {
+	tbot := &tgbot{
+		bot:    b,
+		logger: logger,
 	}
 
-	b, err := bot.New(token, opts...)
-	if err != nil {
-		return fmt.Errorf("creating bot with options: %w", err)
-	}
+	routesRegisterFn(tbot)
 
 	b.Start(ctx)
 
 	return nil
 }
 
-func (t *tgbot) handler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	//nolint:errcheck
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   update.Message.Text,
-	})
+func (t *tgbot) AddExactTextRoute(pattern string, handler TextHandlerFunc) {
+	t.bot.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		pattern,
+		bot.MatchTypeExact,
+		t.wrapTextHandler(handler),
+	)
+}
+
+func (t *tgbot) wrapTextHandler(handler TextHandlerFunc) bot.HandlerFunc {
+	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		if err := handler(ctx, port.MessageInfo{
+			MessageID: update.Message.ID,
+			ChatID:    update.Message.Chat.ID,
+			Text:      update.Message.Text,
+		}); err != nil {
+			t.logger.WithError(err).Error("error while processing message")
+		}
+	}
 }
