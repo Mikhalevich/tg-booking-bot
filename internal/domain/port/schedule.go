@@ -109,4 +109,5 @@ type ScheduleTemplate struct {
 
 type ScheduleRepository interface {
 	GetAllTemplates(ctx context.Context) ([]ScheduleTemplate, error)
+	CreateTestScheduleTemplate(ctx context.Context, tmpl ScheduleTemplate) error
 }

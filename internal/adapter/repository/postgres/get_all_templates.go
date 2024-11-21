@@ -40,10 +40,34 @@ func (p *Postgres) GetAllTemplates(ctx context.Context) ([]port.ScheduleTemplate
 		return nil, fmt.Errorf("select schedule template: %w", err)
 	}
 
-	return nil, nil
+	portTmpls, err := convertToScheduleTemplates(tmpls)
+	if err != nil {
+		return nil, fmt.Errorf("convert to port templates: %w", err)
+	}
+
+	return portTmpls, nil
 }
 
-func ConvertToScheduleTemplate(t scheduleTemplate) (port.ScheduleTemplate, error) {
+func convertToScheduleTemplates(tmpls []scheduleTemplate) ([]port.ScheduleTemplate, error) {
+	if len(tmpls) == 0 {
+		return nil, nil
+	}
+
+	output := make([]port.ScheduleTemplate, 0, len(tmpls))
+
+	for _, t := range tmpls {
+		portTempl, err := convertToScheduleTemplate(t)
+		if err != nil {
+			return nil, fmt.Errorf("convert to port template: %w", err)
+		}
+
+		output = append(output, portTempl)
+	}
+
+	return output, nil
+}
+
+func convertToScheduleTemplate(t scheduleTemplate) (port.ScheduleTemplate, error) {
 	var sch port.Schedule
 	if err := jsonb.ConvertTo(t.SchedulePayload, &sch); err != nil {
 		return port.ScheduleTemplate{}, fmt.Errorf("convert payload: %w", err)
