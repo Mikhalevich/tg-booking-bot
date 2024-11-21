@@ -56,14 +56,18 @@ func (s *schedule) GetAllTemplates(ctx context.Context, info port.MessageInfo) e
 	return nil
 }
 
-func (s *schedule) convertScheduleToString(tmpl port.Schedule) string {
+func (s *schedule) convertScheduleToString(tmpl port.ScheduleTemplate) string {
 	var (
-		sortedHoursByDay = []string{fmt.Sprintf("ID: %s", s.sender.EscapeMarkdown(tmpl.ID))}
-		weekDays         = [...]port.DayOfWeek{port.Mon, port.Tue, port.Wed, port.Thu, port.Fri, port.Sat, port.Sun}
+		sortedHoursByDay = []string{
+			fmt.Sprintf("*Name:* %s", s.sender.EscapeMarkdown(tmpl.Name)),
+			fmt.Sprintf("*Description:* %s", s.sender.EscapeMarkdown(tmpl.Description)),
+			"*Schedule:*",
+		}
+		weekDays = [...]port.DayOfWeek{port.Mon, port.Tue, port.Wed, port.Thu, port.Fri, port.Sat, port.Sun}
 	)
 
 	for _, weekDay := range weekDays {
-		hours := convertHoursForDayOfWeekToString(tmpl.WorkingHours, weekDay)
+		hours := convertHoursForDayOfWeekToString(tmpl.Schedule.WorkingHours, weekDay)
 		if hours != "" {
 			sortedHoursByDay = append(sortedHoursByDay, fmt.Sprintf("%s: %s", weekDay.String(), hours))
 		}

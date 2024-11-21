@@ -38,7 +38,7 @@ services:
   sql-migrate:
     build:
       context: ../../
-      dockerfile: script/docker/sql-migrate.Dockerfile
+      dockerfile: script/docker/sqlmigrate.Dockerfile
     depends_on:
       postgres:
         condition: service_healthy

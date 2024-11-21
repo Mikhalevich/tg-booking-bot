@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 )
 
 type DayOfWeek int
@@ -95,10 +96,17 @@ type HoursByDay struct {
 }
 
 type Schedule struct {
-	ID           string
 	WorkingHours []HoursByDay
 }
 
+type ScheduleTemplate struct {
+	Name        string
+	Description string
+	Schedule    Schedule
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type ScheduleRepository interface {
-	GetAllTemplates(ctx context.Context) ([]Schedule, error)
+	GetAllTemplates(ctx context.Context) ([]ScheduleTemplate, error)
 }
