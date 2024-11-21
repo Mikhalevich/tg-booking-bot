@@ -4,3 +4,5 @@ tracing:
   service_name: "schedule-bot"
 bot:
   token: "schedule-bot-token"
+postgres:
+  connection: "host=postgres port=5432 user=bot password=bot dbname=bot sslmode=disable"

@@ -42,7 +42,11 @@ func runService(cfg config.ScheduleBot, log logger.Logger) error {
 		return fmt.Errorf("make bot api: %w", err)
 	}
 
-	scheduleProcessor := infra.MakeScheduler(b)
+	scheduleProcessor, cleanup, err := infra.MakeScheduler(b, cfg.Postgres)
+	if err != nil {
+		return fmt.Errorf("make scheduler: %w", err)
+	}
+	defer cleanup()
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
