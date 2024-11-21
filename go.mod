@@ -4,7 +4,6 @@ go 1.23.1
 
 require (
 	github.com/go-telegram/bot v1.10.1
-	github.com/go-telegram/ui v0.4.1
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jinzhu/configor v1.2.2
 	github.com/jmoiron/sqlx v1.4.0

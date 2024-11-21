@@ -16,9 +16,6 @@ github.com/go-logr/stdr
 ## explicit; go 1.18
 github.com/go-telegram/bot
 github.com/go-telegram/bot/models
-# github.com/go-telegram/ui v0.4.1
-## explicit; go 1.20
-github.com/go-telegram/ui/paginator
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid

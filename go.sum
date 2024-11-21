@@ -16,8 +16,6 @@ github.com/go-sql-driver/mysql v1.8.1 h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpv
 github.com/go-sql-driver/mysql v1.8.1/go.mod h1:wEBSXgmK//2ZFJyE+qWnIsVGmvmEKlqwuVSjsCm7DZg=
 github.com/go-telegram/bot v1.10.1 h1:zwbEjz6ZlqBsyT5EqNqZDYX1ogHIiln1lwYpcK3E8XA=
 github.com/go-telegram/bot v1.10.1/go.mod h1:i2TRs7fXWIeaceF3z7KzsMt/he0TwkVC680mvdTFYeM=
-github.com/go-telegram/ui v0.4.1 h1:5LECUkzjKuhmW3YMACYFzHD1h1+XUMMS42SN+Fl91is=
-github.com/go-telegram/ui v0.4.1/go.mod h1:Ze99WRnNvRNmZHgyhxH+mb8OhGnptFFsz0F6L2XQcIc=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
