@@ -1,4 +1,4 @@
-package repository
+package noop
 
 import (
 	"context"
@@ -11,7 +11,7 @@ var _ port.ScheduleRepository = (*noop)(nil)
 type noop struct {
 }
 
-func NewNoop() *noop {
+func New() *noop {
 	return &noop{}
 }
 

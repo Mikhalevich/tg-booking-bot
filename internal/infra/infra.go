@@ -9,7 +9,7 @@ import (
 	"github.com/jinzhu/configor"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/messagesender"
-	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository"
+	repositorynoop "github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/noop"
 	"github.com/Mikhalevich/tg-booking-bot/internal/app/tgbot"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/schedule"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
@@ -48,7 +48,7 @@ func MakeBotAPI(token string) (*bot.Bot, error) {
 
 func MakeScheduler(b *bot.Bot) tgbot.Scheduler {
 	return schedule.New(
-		repository.NewNoop(),
+		repositorynoop.New(),
 		messagesender.New(b),
 	)
 }
