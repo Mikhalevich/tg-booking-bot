@@ -8,6 +8,7 @@ import (
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
+	"github.com/Mikhalevich/tg-booking-bot/internal/infra/tracing"
 )
 
 type tgbot struct {
@@ -46,12 +47,15 @@ func (t *tgbot) AddExactTextRoute(pattern string, handler TextHandlerFunc) {
 		bot.HandlerTypeMessageText,
 		pattern,
 		bot.MatchTypeExact,
-		t.wrapTextHandler(handler),
+		t.wrapTextHandler(pattern, handler),
 	)
 }
 
-func (t *tgbot) wrapTextHandler(handler TextHandlerFunc) bot.HandlerFunc {
+func (t *tgbot) wrapTextHandler(pattern string, handler TextHandlerFunc) bot.HandlerFunc {
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		ctx, span := tracing.StartSpanName(ctx, pattern)
+		defer span.End()
+
 		if err := handler(ctx, port.MessageInfo{
 			MessageID: update.Message.ID,
 			ChatID:    update.Message.Chat.ID,

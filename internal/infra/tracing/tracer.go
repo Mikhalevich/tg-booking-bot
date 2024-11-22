@@ -83,6 +83,10 @@ func StartSpan(ctx context.Context) (context.Context, trace.Span) {
 	return std.StartSpan(ctx, callingFuncName())
 }
 
+func StartSpanName(ctx context.Context, spanName string) (context.Context, trace.Span) {
+	return std.StartSpan(ctx, spanName)
+}
+
 func callingFuncName() string {
 	pc, _, _, ok := runtime.Caller(2)
 	if !ok {
