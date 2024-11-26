@@ -14,6 +14,7 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres"
 	"github.com/Mikhalevich/tg-booking-bot/internal/app/tgbot"
 	"github.com/Mikhalevich/tg-booking-bot/internal/config"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/schedule"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 )
@@ -40,41 +41,37 @@ func SetupLogger(lvl string) (logger.Logger, error) {
 	return log, nil
 }
 
-func MakeBotAPI(token string) (*bot.Bot, error) {
-	b, err := bot.New(token)
-	if err != nil {
-		return nil, fmt.Errorf("creating bot: %w", err)
-	}
-
-	return b, nil
-}
-
-func MakeScheduler(
-	b *bot.Bot,
-	postgresCfg config.Postgres,
-) (tgbot.Scheduler, func(), error) {
-	pg, cleanup, err := MakePostgres(postgresCfg)
-	if err != nil {
-		return nil, nil, fmt.Errorf("make postgres: %w", err)
-	}
-
-	return schedule.New(
-		pg,
-		messagesender.New(b),
-	), cleanup, nil
-}
-
 func StartScheduleBot(
 	ctx context.Context,
-	b *bot.Bot,
+	botAPItoken string,
+	postgresCfg config.Postgres,
 	logger logger.Logger,
-	scheduler tgbot.Scheduler,
 ) error {
+	b, err := bot.New(botAPItoken)
+	if err != nil {
+		return fmt.Errorf("creating bot: %w", err)
+	}
+
+	pg, cleanup, err := MakePostgres(postgresCfg)
+	if err != nil {
+		return fmt.Errorf("make postgres: %w", err)
+	}
+	defer cleanup()
+
+	var (
+		msgSender = messagesender.New(b)
+		sch       = schedule.New(pg, msgSender)
+		emp       = employee.New(pg, msgSender)
+	)
+
 	if err := tgbot.Start(
 		ctx,
 		b,
 		logger,
-		tgbot.ScheduleRoutes(scheduler),
+		tgbot.Compose(
+			tgbot.ScheduleRoutes(sch),
+			tgbot.EmployeeRoutes(emp),
+		),
 	); err != nil {
 		return fmt.Errorf("start bot: %w", err)
 	}

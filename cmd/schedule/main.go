@@ -37,17 +37,6 @@ func runService(cfg config.ScheduleBot, log logger.Logger) error {
 		return fmt.Errorf("setup tracer: %w", err)
 	}
 
-	b, err := infra.MakeBotAPI(cfg.Bot.Token)
-	if err != nil {
-		return fmt.Errorf("make bot api: %w", err)
-	}
-
-	scheduleProcessor, cleanup, err := infra.MakeScheduler(b, cfg.Postgres)
-	if err != nil {
-		return fmt.Errorf("make scheduler: %w", err)
-	}
-	defer cleanup()
-
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
@@ -55,9 +44,9 @@ func runService(cfg config.ScheduleBot, log logger.Logger) error {
 
 	if err := infra.StartScheduleBot(
 		ctx,
-		b,
+		cfg.Bot.Token,
+		cfg.Postgres,
 		log.WithField("bot_name", "schedule"),
-		scheduleProcessor,
 	); err != nil {
 		return fmt.Errorf("start bot: %w", err)
 	}

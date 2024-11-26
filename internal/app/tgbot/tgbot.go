@@ -61,7 +61,9 @@ func (t *tgbot) wrapTextHandler(pattern string, handler TextHandlerFunc) bot.Han
 			ChatID:    update.Message.Chat.ID,
 			Text:      update.Message.Text,
 		}); err != nil {
-			t.logger.WithError(err).Error("error while processing message")
+			t.logger.WithError(err).
+				WithField("endpoint", pattern).
+				Error("error while processing message")
 		}
 	}
 }

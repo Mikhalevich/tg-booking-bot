@@ -13,20 +13,25 @@ CREATE TABLE role(
     CONSTRAINT role_name_unique UNIQUE(name)
 );
 
-INSERT INTO role(name) VALUES
-    ('owner'), -- 1
-    ('manager'), -- 2
-    ('employee'); -- 3
+CREATE TYPE employee_state AS ENUM (
+    'verification_required',
+    'registered'
+);
 
 CREATE TABLE employee(
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    first_name TEXT NOT NULL,
-    second_name TEXT NOT NULL,
+    first_name TEXT NOT NULL DEFAULT '',
+    last_name TEXT NOT NULL DEFAULT '',
     role_id INTEGER NOT NULL,
+    chat_id BIGINT,
+    state employee_state NOT NULL DEFAULT 'verification_required',
+    verification_code TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
-    CONSTRAINT employee_role_fk FOREIGN KEY(role_id) REFERENCES role(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT employee_role_fk FOREIGN KEY(role_id) REFERENCES role(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT chat_id_unique UNIQUE(chat_id),
+    CONSTRAINT verification_code_unique UNIQUE(verification_code)
 );
 
 CREATE TABLE employee_schedule(
@@ -41,46 +46,11 @@ CREATE TABLE employee_schedule(
     CONSTRAINT employee_schedule_employee_fk FOREIGN KEY(employee_id) REFERENCES employee(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE role_inher(
-    role_id INTEGER NOT NULL,
-    parent_id INTEGER NOT NULL,
-
-    CONSTRAINT role_inher_pk PRIMARY KEY(role_id, parent_id),
-    CONSTRAINT role_inher_fk_by_role FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT role_inher_fk_by_parent FOREIGN KEY (parent_id) REFERENCES role(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-INSERT INTO role_inher(role_id, parent_id) VALUES
-    (2, 3),
-    (1, 2);
-
-CREATE TYPE permission_action AS ENUM(
-    'view_schedule_template',
-    'add_employee',
-    'edit_employee_schedule'
-);
-
-CREATE TABLE permission(
-    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    action permission_action NOT NULL,
-
-    CONSTRAINT permission_action_unique UNIQUE(action)
-);
-
-CREATE TABLE role_perm(
-    role_id INTEGER NOT NULL,
-    permission_id INTEGER NOT NULL,
-
-    CONSTRAINT role_perm_pk PRIMARY KEY(role_id, permission_id),
-    CONSTRAINT role_perm_role_id_fk FOREIGN KEY(role_id) REFERENCES role(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT role_perm_permission_id_fk FOREIGN KEY(permission_id) REFERENCES permission(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
-DROP TABLE role_perm;
-DROP TABLE permission;
-DROP TABLE role_inher;
+
+DROP TABLE employee_schedule;
 DROP TABLE employee;
+DROP TYPE employee_state
 DROP TABLE role;
+DROP TYPE role_name;

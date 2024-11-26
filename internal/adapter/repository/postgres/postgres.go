@@ -8,7 +8,10 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
-var _ port.ScheduleRepository = (*Postgres)(nil)
+var (
+	_ port.ScheduleRepository = (*Postgres)(nil)
+	_ port.EmployeeRepository = (*Postgres)(nil)
+)
 
 type Postgres struct {
 	db *sqlx.DB
