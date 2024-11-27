@@ -48,6 +48,7 @@ func (p *Postgres) GetAllEmployee(ctx context.Context) ([]port.Employee, error) 
 
 func convertToEmployee(empl employee) port.Employee {
 	return port.Employee{
+		ID:               empl.ID,
 		FirstName:        empl.FirstName,
 		LastName:         empl.LastName,
 		Role:             empl.Role,
