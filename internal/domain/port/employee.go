@@ -32,6 +32,7 @@ type EmployeeRepository interface {
 	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error)
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
+	IsEmployeeNotFoundError(err error) bool
 	AddAction(ctx context.Context, info action.AddActionInfo) error
 	GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
 	IsNoActionsError(err error) bool

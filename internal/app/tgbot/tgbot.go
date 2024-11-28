@@ -12,14 +12,16 @@ import (
 )
 
 type tgbot struct {
-	bot    *bot.Bot
-	logger logger.Logger
+	bot         *bot.Bot
+	logger      logger.Logger
+	middlewares []Middleware
 }
 
-type TextHandlerFunc func(ctx context.Context, info port.MessageInfo) error
+type Middleware func(next port.Handler) port.Handler
 
 type Register interface {
-	AddExactTextRoute(pattern string, handler TextHandlerFunc)
+	AddExactTextRoute(pattern string, handler port.Handler)
+	AddMiddleware(middleware Middleware)
 }
 
 type RouteRegisterFunc func(register Register)
@@ -42,7 +44,7 @@ func Start(
 	return nil
 }
 
-func (t *tgbot) AddExactTextRoute(pattern string, handler TextHandlerFunc) {
+func (t *tgbot) AddExactTextRoute(pattern string, handler port.Handler) {
 	t.bot.RegisterHandler(
 		bot.HandlerTypeMessageText,
 		pattern,
@@ -51,7 +53,15 @@ func (t *tgbot) AddExactTextRoute(pattern string, handler TextHandlerFunc) {
 	)
 }
 
-func (t *tgbot) wrapTextHandler(pattern string, handler TextHandlerFunc) bot.HandlerFunc {
+func (t *tgbot) AddMiddleware(m Middleware) {
+	t.middlewares = append(t.middlewares, m)
+}
+
+func (t *tgbot) wrapTextHandler(pattern string, handler port.Handler) bot.HandlerFunc {
+	for i := len(t.middlewares) - 1; i >= 0; i-- {
+		handler = t.middlewares[i](handler)
+	}
+
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		ctx, span := tracing.StartSpanName(ctx, pattern)
 		defer span.End()

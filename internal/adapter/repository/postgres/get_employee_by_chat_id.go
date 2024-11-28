@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
@@ -31,4 +33,8 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.
 	}
 
 	return convertToEmployee(emp), nil
+}
+
+func (p *Postgres) IsEmployeeNotFoundError(err error) bool {
+	return errors.Is(err, sql.ErrNoRows)
 }
