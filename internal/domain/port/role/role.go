@@ -3,9 +3,10 @@ package role
 type Role string
 
 const (
-	Owner    Role = "owner"
-	Manager  Role = "manager"
-	Employee Role = "employee"
+	Unspecified Role = "unspecified"
+	Owner       Role = "owner"
+	Manager     Role = "manager"
+	Employee    Role = "employee"
 )
 
 func (r Role) String() string {

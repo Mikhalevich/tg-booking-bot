@@ -56,5 +56,5 @@ func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verification
 		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
-	return 0, nil
+	return employeeID, nil
 }

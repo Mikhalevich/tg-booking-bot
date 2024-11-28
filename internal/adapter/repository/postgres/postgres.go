@@ -1,11 +1,15 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
 var (
@@ -21,4 +25,24 @@ func New(db *sql.DB, driverName string) *Postgres {
 	return &Postgres{
 		db: sqlx.NewDb(db, driverName),
 	}
+}
+
+func (p *Postgres) roleIDByName(ctx context.Context, r role.Role) (int, error) {
+	var roleID int
+	if err := p.db.GetContext(
+		ctx,
+		&roleID,
+		`SELECT id
+		FROM role
+		WHERE name = $1
+	`, r.String(),
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, fmt.Errorf("role name %s doesn't exist", r.String())
+		}
+
+		return 0, fmt.Errorf("get role_id by name: %w", err)
+	}
+
+	return roleID, nil
 }

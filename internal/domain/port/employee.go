@@ -29,6 +29,7 @@ type Employee struct {
 
 type EmployeeRepository interface {
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
+	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error)
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
 	AddAction(ctx context.Context, info action.AddActionInfo) error
