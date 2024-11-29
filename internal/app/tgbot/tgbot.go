@@ -57,23 +57,32 @@ func (t *tgbot) AddMiddleware(m Middleware) {
 	t.middlewares = append(t.middlewares, m)
 }
 
-func (t *tgbot) wrapTextHandler(pattern string, handler port.Handler) bot.HandlerFunc {
-	for i := len(t.middlewares) - 1; i >= 0; i-- {
-		handler = t.middlewares[i](handler)
-	}
+func (t *tgbot) wrapTextHandler(pattern string, h port.Handler) bot.HandlerFunc {
+	t.applyMiddleware(h)
 
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		ctx, span := tracing.StartSpanName(ctx, pattern)
 		defer span.End()
 
-		if err := handler(ctx, port.MessageInfo{
-			MessageID: update.Message.ID,
-			ChatID:    update.Message.Chat.ID,
-			Text:      update.Message.Text,
-		}); err != nil {
+		if err := h(
+			ctx,
+			port.MessageInfo{
+				MessageID: update.Message.ID,
+				ChatID:    update.Message.Chat.ID,
+				Text:      update.Message.Text,
+			},
+		); err != nil {
 			t.logger.WithError(err).
 				WithField("endpoint", pattern).
 				Error("error while processing message")
 		}
 	}
+}
+
+func (t *tgbot) applyMiddleware(h port.Handler) port.Handler {
+	for i := len(t.middlewares) - 1; i >= 0; i-- {
+		h = t.middlewares[i](h)
+	}
+
+	return h
 }
