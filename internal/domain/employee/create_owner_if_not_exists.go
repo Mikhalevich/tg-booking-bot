@@ -25,9 +25,22 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		return nil
 	}
 
-	createdOwnerID, err := e.repository.CreateOwnerIfNotExists(ctx, info.ChatID)
+	createOwnerOutput, err := e.repository.CreateOwnerIfNotExists(ctx, info.ChatID)
 	if err != nil {
 		return fmt.Errorf("create owner: %w", err)
+	}
+
+	if createOwnerOutput.IsAlreadyExists {
+		if err := e.sender.ReplyText(
+			ctx,
+			info.ChatID,
+			info.MessageID,
+			"owner already exists",
+		); err != nil {
+			return fmt.Errorf("owner exists reply: %w", err)
+		}
+
+		return nil
 	}
 
 	if err := e.sender.ReplyText(
@@ -39,13 +52,13 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		return fmt.Errorf("created reply: %w", err)
 	}
 
-	actionPayload, err := employeeIDToActionPayload(createdOwnerID)
+	actionPayload, err := employeeIDToActionPayload(createOwnerOutput.CreatedOwnerID)
 	if err != nil {
 		return fmt.Errorf("convert employee id to action payload: %w", err)
 	}
 
 	if err := e.repository.AddAction(ctx, action.AddActionInfo{
-		EmployeeID: createdOwnerID,
+		EmployeeID: createOwnerOutput.CreatedOwnerID,
 		Action:     action.EditEmployeeFirstName,
 		Payload:    actionPayload,
 		CreatedAt:  time.Now(),

@@ -27,9 +27,14 @@ type Employee struct {
 	UpdatedAt        time.Time
 }
 
+type CreateOwnerIfNotExistsOutput struct {
+	CreatedOwnerID  int
+	IsAlreadyExists bool
+}
+
 type EmployeeRepository interface {
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
-	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error)
+	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (CreateOwnerIfNotExistsOutput, error)
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
 	IsEmployeeNotFoundError(err error) bool

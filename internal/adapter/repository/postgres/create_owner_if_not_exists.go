@@ -2,42 +2,87 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/transaction"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-// CreateOwnerIfNotExists returns id of created owner.
 func (p *Postgres) CreateOwnerIfNotExists(
 	ctx context.Context,
 	chatID int64,
-) (int, error) {
-	employeeID, err := p.createEmployeeWithoutVerification(ctx, role.Unspecified, chatID)
-	if err != nil {
-		return 0, fmt.Errorf("create employee with invalid role: %w", err)
+) (port.CreateOwnerIfNotExistsOutput, error) {
+	var output port.CreateOwnerIfNotExistsOutput
+	if err := transaction.Transaction(ctx, p.db, func(ctx context.Context, tx *sqlx.Tx) error {
+		ownerRoleID, err := p.roleIDByName(ctx, role.Owner, tx)
+		if err != nil {
+			return fmt.Errorf("get role id: %w", err)
+		}
+
+		isExists, err := p.IsEmployeeWithRoleExists(ctx, ownerRoleID, tx)
+		if err != nil {
+			return fmt.Errorf("check for owner existence: %w", err)
+		}
+
+		if isExists {
+			output = port.CreateOwnerIfNotExistsOutput{
+				IsAlreadyExists: true,
+			}
+			return nil
+		}
+
+		ownerID, err := p.createEmployeeWithoutVerification(ctx, ownerRoleID, chatID, tx)
+		if err != nil {
+			return fmt.Errorf("create owner without verification: %w", err)
+		}
+
+		output = port.CreateOwnerIfNotExistsOutput{
+			CreatedOwnerID: ownerID,
+		}
+
+		return nil
+	}); err != nil {
+		return output, fmt.Errorf("transaction: %w", err)
 	}
 
-	if err := p.updateRoleFromUnspecifiedToOwner(ctx, employeeID); err != nil {
-		return 0, fmt.Errorf("upate role from unspecified to owner: %w", err)
+	return output, nil
+}
+
+func (p *Postgres) IsEmployeeWithRoleExists(
+	ctx context.Context,
+	roleID int,
+	tx *sqlx.Tx,
+) (bool, error) {
+	var isExists bool
+	if err := sqlx.SelectContext(
+		ctx,
+		tx,
+		&isExists,
+		`
+			SELECT
+				TRUE
+			FROM
+				employee
+			WHERE
+				role_id = $1
+		`,
+		roleID,
+	); err != nil {
+		return false, fmt.Errorf("select: %w", err)
 	}
 
-	return employeeID, nil
+	return isExists, nil
 }
 
 func (p *Postgres) createEmployeeWithoutVerification(
 	ctx context.Context,
-	r role.Role,
+	roleID int,
 	chatID int64,
+	tx *sqlx.Tx,
 ) (int, error) {
-	roleID, err := p.roleIDByName(ctx, r)
-	if err != nil {
-		return 0, fmt.Errorf("get role id: %w", err)
-	}
-
 	query, args, err := sqlx.Named(
 		`INSERT INTO employee(
 				role_id,
@@ -60,46 +105,9 @@ func (p *Postgres) createEmployeeWithoutVerification(
 	}
 
 	var employeeID int
-	if err := sqlx.GetContext(ctx, p.db, &employeeID, p.db.Rebind(query), args...); err != nil {
+	if err := sqlx.GetContext(ctx, tx, &employeeID, p.db.Rebind(query), args...); err != nil {
 		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
 	return employeeID, nil
-}
-
-func (p *Postgres) updateRoleFromUnspecifiedToOwner(ctx context.Context, employeeID int) error {
-	ownerID, err := p.roleIDByName(ctx, role.Owner)
-	if err != nil {
-		return fmt.Errorf("get owner role id: %w", err)
-	}
-
-	res, err := p.db.NamedExecContext(ctx, `
-		UPDATE employee SET
-			role_id = :role_id
-		WHERE
-			id = :employee_id AND
-			NOT EXISTS (
-				SELECT *
-				FROM employee
-				WHERE role_id = :role_id
-			)
-	`, map[string]any{
-		"role_id":     ownerID,
-		"employee_id": employeeID,
-	})
-
-	if err != nil {
-		return fmt.Errorf("named exec: %w", err)
-	}
-
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("rows affected: %w", err)
-	}
-
-	if rows == 0 {
-		return errors.New("unable to update invalid to owner")
-	}
-
-	return nil
 }

@@ -27,15 +27,18 @@ func New(db *sql.DB, driverName string) *Postgres {
 	}
 }
 
-func (p *Postgres) roleIDByName(ctx context.Context, r role.Role) (int, error) {
+func (p *Postgres) roleIDByName(ctx context.Context, r role.Role, db sqlx.QueryerContext) (int, error) {
 	var roleID int
-	if err := p.db.GetContext(
+	if err := sqlx.GetContext(
 		ctx,
+		db,
 		&roleID,
-		`SELECT id
-		FROM role
-		WHERE name = $1
-	`, r.String(),
+		`
+			SELECT id
+			FROM role
+			WHERE name = $1
+		`,
+		r.String(),
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, fmt.Errorf("role name %s doesn't exist", r.String())
