@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -15,7 +16,18 @@ func Transaction(
 	s *sqlx.DB,
 	fn TxFunc,
 ) error {
-	tx, err := s.BeginTxx(ctx, nil)
+	return TransactionWithLevel(ctx, s, sql.LevelDefault, fn)
+}
+
+func TransactionWithLevel(
+	ctx context.Context,
+	s *sqlx.DB,
+	level sql.IsolationLevel,
+	fn TxFunc,
+) error {
+	tx, err := s.BeginTxx(ctx, &sql.TxOptions{
+		Isolation: level,
+	})
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
 	}

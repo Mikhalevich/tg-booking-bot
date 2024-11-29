@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -16,35 +18,36 @@ func (p *Postgres) CreateOwnerIfNotExists(
 	chatID int64,
 ) (port.CreateOwnerIfNotExistsOutput, error) {
 	var output port.CreateOwnerIfNotExistsOutput
-	if err := transaction.Transaction(ctx, p.db, func(ctx context.Context, tx *sqlx.Tx) error {
-		ownerRoleID, err := p.roleIDByName(ctx, role.Owner, tx)
-		if err != nil {
-			return fmt.Errorf("get role id: %w", err)
-		}
-
-		isExists, err := p.IsEmployeeWithRoleExists(ctx, ownerRoleID, tx)
-		if err != nil {
-			return fmt.Errorf("check for owner existence: %w", err)
-		}
-
-		if isExists {
-			output = port.CreateOwnerIfNotExistsOutput{
-				IsAlreadyExists: true,
+	if err := transaction.TransactionWithLevel(ctx, p.db, sql.LevelSerializable,
+		func(ctx context.Context, tx *sqlx.Tx) error {
+			ownerRoleID, err := p.roleIDByName(ctx, role.Owner, tx)
+			if err != nil {
+				return fmt.Errorf("get role id: %w", err)
 			}
+
+			isExists, err := p.IsEmployeeWithRoleExists(ctx, ownerRoleID, tx)
+			if err != nil {
+				return fmt.Errorf("check for owner existence: %w", err)
+			}
+
+			if isExists {
+				output = port.CreateOwnerIfNotExistsOutput{
+					IsAlreadyExists: true,
+				}
+				return nil
+			}
+
+			ownerID, err := p.createEmployeeWithoutVerification(ctx, ownerRoleID, chatID, tx)
+			if err != nil {
+				return fmt.Errorf("create owner without verification: %w", err)
+			}
+
+			output = port.CreateOwnerIfNotExistsOutput{
+				CreatedOwnerID: ownerID,
+			}
+
 			return nil
-		}
-
-		ownerID, err := p.createEmployeeWithoutVerification(ctx, ownerRoleID, chatID, tx)
-		if err != nil {
-			return fmt.Errorf("create owner without verification: %w", err)
-		}
-
-		output = port.CreateOwnerIfNotExistsOutput{
-			CreatedOwnerID: ownerID,
-		}
-
-		return nil
-	}); err != nil {
+		}); err != nil {
 		return output, fmt.Errorf("transaction: %w", err)
 	}
 
@@ -57,7 +60,7 @@ func (p *Postgres) IsEmployeeWithRoleExists(
 	tx *sqlx.Tx,
 ) (bool, error) {
 	var isExists bool
-	if err := sqlx.SelectContext(
+	if err := sqlx.GetContext(
 		ctx,
 		tx,
 		&isExists,
@@ -71,10 +74,14 @@ func (p *Postgres) IsEmployeeWithRoleExists(
 		`,
 		roleID,
 	); err != nil {
-		return false, fmt.Errorf("select: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+
+		return false, fmt.Errorf("get context: %w", err)
 	}
 
-	return isExists, nil
+	return true, nil
 }
 
 func (p *Postgres) createEmployeeWithoutVerification(
