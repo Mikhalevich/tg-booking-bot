@@ -58,7 +58,7 @@ func (t *tgbot) AddMiddleware(m Middleware) {
 }
 
 func (t *tgbot) wrapTextHandler(pattern string, h port.Handler) bot.HandlerFunc {
-	t.applyMiddleware(h)
+	h = t.applyMiddleware(h)
 
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		ctx, span := tracing.StartSpanName(ctx, pattern)

@@ -5,11 +5,26 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
 func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.MessageInfo) error {
+	_, ok := ctxdata.Employee(ctx)
+	if ok {
+		if err := e.sender.ReplyText(
+			ctx,
+			info.ChatID,
+			info.MessageID,
+			"not allowed",
+		); err != nil {
+			return fmt.Errorf("not allowed reply: %w", err)
+		}
+
+		return nil
+	}
+
 	createdOwnerID, err := e.repository.CreateOwnerIfNotExists(ctx, info.ChatID)
 	if err != nil {
 		return fmt.Errorf("create owner: %w", err)
@@ -21,7 +36,7 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		info.MessageID,
 		"created",
 	); err != nil {
-		return fmt.Errorf("reply text: %w", err)
+		return fmt.Errorf("created reply: %w", err)
 	}
 
 	actionPayload, err := employeeIDToActionPayload(createdOwnerID)

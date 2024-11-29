@@ -16,7 +16,7 @@ func WithEmployee(ctx context.Context, employee port.Employee) context.Context {
 	return context.WithValue(ctx, employeeKey, employee)
 }
 
-func EmployeeID(ctx context.Context) (port.Employee, bool) {
+func Employee(ctx context.Context) (port.Employee, bool) {
 	val := ctx.Value(employeeKey)
 	if val == nil {
 		return port.Employee{}, false

@@ -16,23 +16,10 @@ func (e *employee) EmployeeMiddleware(next port.Handler) port.Handler {
 			if !e.repository.IsEmployeeNotFoundError(err) {
 				return fmt.Errorf("get employee by chat_id: %w", err)
 			}
-
-			if err := e.sender.ReplyText(
-				ctx,
-				info.ChatID,
-				info.MessageID,
-				"please enter verification code for registration",
-			); err != nil {
-				return fmt.Errorf("reply text: %w", err)
-			}
-
-			return nil
+		} else {
+			ctx = ctxdata.WithEmployee(ctx, empl)
 		}
 
-		if err := next(ctxdata.WithEmployee(ctx, empl), info); err != nil {
-			return fmt.Errorf("employee middleware: %w", err)
-		}
-
-		return nil
+		return next(ctx, info)
 	}
 }
