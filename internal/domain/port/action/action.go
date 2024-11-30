@@ -6,13 +6,12 @@ import (
 
 type Action string
 
-type ActionInfo struct {
-	ActionID int
-	Action   Action
-	Payload  []byte
+func (a Action) String() string {
+	return string(a)
 }
 
-type AddActionInfo struct {
+type ActionInfo struct {
+	ActionID   int
 	EmployeeID int
 	Action     Action
 	Payload    []byte

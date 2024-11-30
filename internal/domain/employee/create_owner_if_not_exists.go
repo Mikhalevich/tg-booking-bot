@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/actionpayload"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
@@ -52,12 +53,12 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		return fmt.Errorf("created reply: %w", err)
 	}
 
-	actionPayload, err := employeeIDToActionPayload(createOwnerOutput.CreatedOwnerID)
+	actionPayload, err := actionpayload.BytesFromEmployeeID(createOwnerOutput.CreatedOwnerID)
 	if err != nil {
 		return fmt.Errorf("convert employee id to action payload: %w", err)
 	}
 
-	if err := e.repository.AddAction(ctx, action.AddActionInfo{
+	if err := e.repository.AddAction(ctx, action.ActionInfo{
 		EmployeeID: createOwnerOutput.CreatedOwnerID,
 		Action:     action.EditEmployeeFirstName,
 		Payload:    actionPayload,

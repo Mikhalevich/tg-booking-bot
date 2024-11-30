@@ -2,6 +2,7 @@ package employee
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
@@ -9,10 +10,10 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
-func (e *employee) ProcessNextAction(ctx context.Context, info port.MessageInfo) error {
+func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageInfo) error {
 	empl, ok := ctxdata.Employee(ctx)
 	if !ok {
-		if err := e.processVerificationCode(ctx, info.ChatID, info.Text); err != nil {
+		if err := e.processVerificationCode(ctx, msgInfo.ChatID, msgInfo.Text); err != nil {
 			return fmt.Errorf("process verification code: %w", err)
 		}
 
@@ -26,15 +27,15 @@ func (e *employee) ProcessNextAction(ctx context.Context, info port.MessageInfo)
 
 	if !ok {
 		if err := e.sender.ReplyText(
-			ctx, info.ChatID,
-			info.MessageID,
+			ctx, msgInfo.ChatID,
+			msgInfo.MessageID,
 			"no action required",
 		); err != nil {
 			return fmt.Errorf("reply text no action required: %w", err)
 		}
 	}
 
-	if err := e.processNextAction(ctx, actionInfo); err != nil {
+	if err := e.processAction(ctx, msgInfo, actionInfo); err != nil {
 		return fmt.Errorf("process next action: %w", err)
 	}
 
@@ -45,6 +46,25 @@ func (e *employee) processVerificationCode(ctx context.Context, chatID int64, co
 	return nil
 }
 
-func (e *employee) processNextAction(ctx context.Context, a action.ActionInfo) error {
+func (e *employee) processAction(
+	ctx context.Context,
+	msgInfo port.MessageInfo,
+	actionInfo action.ActionInfo,
+) error {
+	var err error
+
+	switch actionInfo.Action {
+	case action.EditEmployeeFirstName:
+		err = e.actionEditFirstName(ctx, msgInfo, actionInfo)
+	case action.EditEmployeeLastName:
+		err = errors.New("not implemented")
+	default:
+		err = errors.New("invalid action")
+	}
+
+	if err != nil {
+		return fmt.Errorf("action %s: %w", actionInfo.Action.String(), err)
+	}
+
 	return nil
 }

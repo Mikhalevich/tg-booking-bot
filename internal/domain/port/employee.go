@@ -32,13 +32,20 @@ type CreateOwnerIfNotExistsOutput struct {
 	IsAlreadyExists bool
 }
 
+type EditNameInput struct {
+	EmployeeID        int
+	Name              string
+	TriggeredActionID int
+}
+
 type EmployeeRepository interface {
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
+	EditFirstName(ctx context.Context, nameInfo EditNameInput, nextAction *action.ActionInfo) error
 	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (CreateOwnerIfNotExistsOutput, error)
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
 	IsEmployeeNotFoundError(err error) bool
-	AddAction(ctx context.Context, info action.AddActionInfo) error
+	AddAction(ctx context.Context, info action.ActionInfo) error
 	GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
 	IsActionNotFoundError(err error) bool
 }

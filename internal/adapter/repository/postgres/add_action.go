@@ -8,7 +8,7 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
-func (p *Postgres) AddAction(ctx context.Context, info action.AddActionInfo) error {
+func (p *Postgres) AddAction(ctx context.Context, info action.ActionInfo) error {
 	res, err := p.db.NamedExecContext(
 		ctx,
 		`INSERT INTO actions(

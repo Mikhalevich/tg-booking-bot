@@ -2,13 +2,12 @@ package employee
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/actionpayload"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
@@ -36,12 +35,12 @@ func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) er
 		return fmt.Errorf("get employee by chat_id: %w", err)
 	}
 
-	actionPayload, err := employeeIDToActionPayload(createdEmpID)
+	actionPayload, err := actionpayload.BytesFromEmployeeID(createdEmpID)
 	if err != nil {
 		return fmt.Errorf("convert employee id to action payload: %w", err)
 	}
 
-	if err := e.repository.AddAction(ctx, action.AddActionInfo{
+	if err := e.repository.AddAction(ctx, action.ActionInfo{
 		EmployeeID: currentEmployee.ID,
 		Action:     action.EditEmployeeFirstName,
 		Payload:    actionPayload,
@@ -51,37 +50,4 @@ func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) er
 	}
 
 	return nil
-}
-
-func employeeIDToActionPayload(id int) ([]byte, error) {
-	b, err := json.Marshal(map[string]int{
-		"employee_id": id,
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("json marshal: %w", err)
-	}
-
-	return b, nil
-}
-
-//nolint:unused
-func actionPayloadToEmployeeID(payload []byte) (int, error) {
-	var m map[string]any
-	if err := json.Unmarshal(payload, &m); err != nil {
-		return 0, fmt.Errorf("json unmarshal: %w", err)
-	}
-
-	rawID, ok := m["employee_id"]
-	if !ok {
-		return 0, errors.New("no employee id in payload")
-	}
-
-	id, ok := rawID.(int)
-
-	if !ok {
-		return 0, errors.New("invalid employee_id type")
-	}
-
-	return id, nil
 }
