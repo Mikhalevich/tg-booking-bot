@@ -51,6 +51,6 @@ func (p *Postgres) GetNextNotCompletedAction(ctx context.Context, employeeID int
 	}, nil
 }
 
-func (p *Postgres) IsNoActionsError(err error) bool {
+func (p *Postgres) IsActionNotFoundError(err error) bool {
 	return errors.Is(err, sql.ErrNoRows)
 }

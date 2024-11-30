@@ -40,5 +40,5 @@ type EmployeeRepository interface {
 	IsEmployeeNotFoundError(err error) bool
 	AddAction(ctx context.Context, info action.AddActionInfo) error
 	GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
-	IsNoActionsError(err error) bool
+	IsActionNotFoundError(err error) bool
 }
