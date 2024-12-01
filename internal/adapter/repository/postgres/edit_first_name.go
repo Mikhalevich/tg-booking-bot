@@ -66,7 +66,7 @@ func (p *Postgres) updateFirstName(
 			UPDATE employee
 			SET
 				first_name = :first_name,
-				updated_at = :updated_at,
+				updated_at = :updated_at
 			WHERE
 				id = :employee_id
 		`,
@@ -104,7 +104,7 @@ func (p *Postgres) completeAction(
 			UPDATE actions
 			SET
 				is_completed = TRUE,
-				completed_at = :completed_at,
+				completed_at = :completed_at
 			WHERE
 				id = :action_id AND
 				is_completed = FALSE
