@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
@@ -15,6 +16,7 @@ const (
 )
 
 type Employee struct {
+	ID               int
 	FirstName        string
 	LastName         string
 	Role             role.Role
@@ -25,7 +27,26 @@ type Employee struct {
 	UpdatedAt        time.Time
 }
 
+type CreateOwnerIfNotExistsOutput struct {
+	CreatedOwnerID  int
+	IsAlreadyExists bool
+}
+
+type EditNameInput struct {
+	EmployeeID        int
+	Name              string
+	TriggeredActionID int
+	OperationTime     time.Time
+}
+
 type EmployeeRepository interface {
-	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) error
+	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
+	EditFirstName(ctx context.Context, nameInfo EditNameInput, nextAction *action.ActionInfo) error
+	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (CreateOwnerIfNotExistsOutput, error)
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
+	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
+	IsEmployeeNotFoundError(err error) bool
+	AddAction(ctx context.Context, info *action.ActionInfo) error
+	GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
+	IsActionNotFoundError(err error) bool
 }

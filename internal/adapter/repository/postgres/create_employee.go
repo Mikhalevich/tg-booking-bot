@@ -6,11 +6,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verificationCode string) error {
+// CreateEmployee returns id of created employee.
+func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error) {
 	var roleID int
 	if err := p.db.GetContext(
 		ctx,
@@ -21,14 +24,13 @@ func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verification
 	`, r.String(),
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("role name %s doesn't exist", r.String())
+			return 0, fmt.Errorf("role name %s doesn't exist", r.String())
 		}
 
-		return fmt.Errorf("get role_id by role name")
+		return 0, fmt.Errorf("get role_id by role name")
 	}
 
-	res, err := p.db.NamedExecContext(
-		ctx,
+	query, args, err := sqlx.Named(
 		`INSERT INTO employee(
 			role_id,
 			state,
@@ -37,24 +39,22 @@ func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verification
 			:role_id,
 			:state,
 			:verification_code
-		)`, map[string]any{
+		)
+		RETURNING id
+		`, map[string]any{
 			"role_id":           roleID,
 			"state":             port.EmployeeStateVerificationRequired,
 			"verification_code": verificationCode,
 		})
 
 	if err != nil {
-		return fmt.Errorf("exec create employee: %w", err)
+		return 0, fmt.Errorf("create named query: %w", err)
 	}
 
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("check rows affected: %w", err)
+	var employeeID int
+	if err := sqlx.GetContext(ctx, p.db, &employeeID, p.db.Rebind(query), args...); err != nil {
+		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
-	if rows == 0 {
-		return fmt.Errorf("no rows affected: %w", err)
-	}
-
-	return nil
+	return employeeID, nil
 }

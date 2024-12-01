@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
@@ -34,7 +35,14 @@ func (e *employee) formatEmployeeMsg(empls []port.Employee) string {
 	output := make([]string, 0, len(empls))
 
 	for _, emp := range empls {
-		empLine := fmt.Sprintf("*role:* %s *verification code:* %s", emp.Role, e.sender.EscapeMarkdown(emp.VerificationCode))
+		empLine := fmt.Sprintf(
+			"*first name:* %s *last name:* %s *role:* %s *code:* %s *created at:* %s",
+			e.sender.EscapeMarkdown(emp.FirstName),
+			e.sender.EscapeMarkdown(emp.LastName),
+			emp.Role,
+			e.sender.EscapeMarkdown(emp.VerificationCode),
+			e.sender.EscapeMarkdown(emp.CreatedAt.Format(time.RFC3339)),
+		)
 		output = append(output, empLine)
 	}
 

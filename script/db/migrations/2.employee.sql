@@ -2,6 +2,7 @@
 -- SQL in section 'Up' is executed when this migration is applied
 
 CREATE TYPE role_name AS ENUM(
+    'unspecified',
     'owner',
     'manager',
     'employee'
