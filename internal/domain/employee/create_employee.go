@@ -40,7 +40,7 @@ func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) er
 		return fmt.Errorf("convert employee id to action payload: %w", err)
 	}
 
-	if err := e.repository.AddAction(ctx, action.ActionInfo{
+	if err := e.repository.AddAction(ctx, &action.ActionInfo{
 		EmployeeID: currentEmployee.ID,
 		Action:     action.EditEmployeeFirstName,
 		Payload:    actionPayload,

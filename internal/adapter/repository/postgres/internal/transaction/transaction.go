@@ -33,11 +33,8 @@ func TransactionWithLevel(
 	}
 
 	defer func() {
-		if r := recover(); r != nil {
-			//nolint:errcheck
-			tx.Rollback()
-			panic(r)
-		}
+		//nolint:errcheck
+		tx.Rollback()
 	}()
 
 	if err := fn(ctx, tx); err != nil {

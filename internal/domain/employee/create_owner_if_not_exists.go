@@ -58,7 +58,7 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		return fmt.Errorf("convert employee id to action payload: %w", err)
 	}
 
-	if err := e.repository.AddAction(ctx, action.ActionInfo{
+	if err := e.repository.AddAction(ctx, &action.ActionInfo{
 		EmployeeID: createOwnerOutput.CreatedOwnerID,
 		Action:     action.EditEmployeeFirstName,
 		Payload:    actionPayload,

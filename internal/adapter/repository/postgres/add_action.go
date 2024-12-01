@@ -5,25 +5,39 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
-func (p *Postgres) AddAction(ctx context.Context, info action.ActionInfo) error {
-	res, err := p.db.NamedExecContext(
+func (p *Postgres) AddAction(ctx context.Context, info *action.ActionInfo) error {
+	return p.addAction(ctx, p.db, info)
+}
+
+func (p *Postgres) addAction(
+	ctx context.Context,
+	e sqlx.ExtContext,
+	info *action.ActionInfo,
+) error {
+	res, err := sqlx.NamedExecContext(
 		ctx,
-		`INSERT INTO actions(
-			employee_id,
-			action,
-			payload,
-			is_completed,
-			created_at
-		) VALUES (
-			:employee_id,
-			:action,
-			:payload,
-			:is_completed,
-			:created_at
-		)`, map[string]any{
+		e,
+		`
+			INSERT INTO actions(
+				employee_id,
+				action,
+				payload,
+				is_completed,
+				created_at
+			) VALUES (
+				:employee_id,
+				:action,
+				:payload,
+				:is_completed,
+				:created_at
+			)
+		`,
+		map[string]any{
 			"employee_id":  info.EmployeeID,
 			"action":       info.Action,
 			"payload":      info.Payload,
@@ -37,7 +51,7 @@ func (p *Postgres) AddAction(ctx context.Context, info action.ActionInfo) error 
 
 	rows, err := res.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("check rows affected: %w", err)
+		return fmt.Errorf("rows affected: %w", err)
 	}
 
 	if rows == 0 {
