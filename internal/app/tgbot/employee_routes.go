@@ -3,6 +3,7 @@ package tgbot
 import (
 	"context"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/app/tgbot/router"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
@@ -16,16 +17,20 @@ type Employer interface {
 }
 
 func EmployeeRoutes(e Employer) RouteRegisterFunc {
-	return func(register Register) {
-		register.AddMiddleware(e.EmployeeMiddleware)
+	return func(r router.Register) {
+		r.MiddlewareGroup(func(r router.Register) {
+			r.AddMiddleware(e.EmployeeMiddleware)
 
-		register.AddExactTextRoute("/makemeowner", e.CreateOwnerIfNotExists)
+			r.MiddlewareGroup(func(r router.Register) {
+				r.AddMiddleware(e.RegistrationMiddleware)
 
-		register.AddMiddleware(e.RegistrationMiddleware)
+				r.AddExactTextRoute("/createemployee", e.CreateEmployee)
+				r.AddExactTextRoute("/getallemployee", e.GetAllEmployee)
+			})
 
-		register.AddExactTextRoute("/createemployee", e.CreateEmployee)
-		register.AddExactTextRoute("/getallemployee", e.GetAllEmployee)
+			r.AddExactTextRoute("/makemeowner", e.CreateOwnerIfNotExists)
 
-		register.AddDefaultTextHandler(e.ProcessNextAction, e.EmployeeMiddleware)
+			r.AddDefaultTextHandler(e.ProcessNextAction)
+		})
 	}
 }
