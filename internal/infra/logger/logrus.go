@@ -6,6 +6,9 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
+	"github.com/uptrace/opentelemetry-go-extra/otellogrus"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger/internal/logrusimpl"
 )
 
 type Logrus struct {
@@ -16,6 +19,8 @@ func NewLogrus() *Logrus {
 	logger := logrus.New()
 	logger.SetOutput(os.Stdout)
 	logger.SetFormatter(&logrus.JSONFormatter{})
+
+	instrumentOtel(logger)
 
 	return &Logrus{
 		l: logrus.NewEntry(logger),
@@ -33,9 +38,22 @@ func NewLogrusWithLevel(lvl string) (*Logrus, error) {
 	logger.SetOutput(os.Stdout)
 	logger.SetFormatter(&logrus.JSONFormatter{})
 
+	instrumentOtel(logger)
+
 	return &Logrus{
 		l: logrus.NewEntry(logger),
 	}, nil
+}
+
+func instrumentOtel(logger *logrus.Logger) {
+	logger.AddHook(otellogrus.NewHook(otellogrus.WithLevels(
+		logrus.PanicLevel,
+		logrus.FatalLevel,
+		logrus.ErrorLevel,
+		logrus.WarnLevel,
+	)))
+
+	logger.AddHook(logrusimpl.NewOtelFieldsHook())
 }
 
 func (lw *Logrus) Debugf(format string, args ...interface{}) {

@@ -43,7 +43,7 @@ func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageIn
 }
 
 func (e *employee) processVerificationCode(ctx context.Context, chatID int64, code string) error {
-	return nil
+	return errors.New("not implemented")
 }
 
 func (e *employee) processAction(

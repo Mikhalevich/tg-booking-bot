@@ -80,7 +80,8 @@ func (r *Router) wrapTextHandler(pattern string, h port.Handler) bot.HandlerFunc
 				Text:      update.Message.Text,
 			},
 		); err != nil {
-			r.logger.WithError(err).
+			r.logger.WithContext(ctx).
+				WithError(err).
 				WithField("endpoint", pattern).
 				Error("error while processing message")
 		}
