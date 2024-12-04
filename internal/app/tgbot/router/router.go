@@ -80,9 +80,23 @@ func (r *Router) wrapTextHandler(pattern string, h port.Handler) bot.HandlerFunc
 				Text:      update.Message.Text,
 			},
 		); err != nil {
-			r.logger.WithError(err).
+			r.logger.WithContext(ctx).
+				WithError(err).
 				WithField("endpoint", pattern).
 				Error("error while processing message")
+
+			if _, err := b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				ReplyParameters: &models.ReplyParameters{
+					MessageID: update.Message.ID,
+				},
+				Text: "internal error",
+			}); err != nil {
+				r.logger.WithContext(ctx).
+					WithError(err).
+					WithField("endpoint", pattern).
+					Error("send internal error message")
+			}
 		}
 	}
 }

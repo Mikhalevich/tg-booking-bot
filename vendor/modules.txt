@@ -58,9 +58,15 @@ github.com/jmoiron/sqlx/reflectx
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
+# github.com/uptrace/opentelemetry-go-extra/otellogrus v0.3.2
+## explicit; go 1.22
+github.com/uptrace/opentelemetry-go-extra/otellogrus
 # github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.2
 ## explicit; go 1.22
 github.com/uptrace/opentelemetry-go-extra/otelsql
+# github.com/uptrace/opentelemetry-go-extra/otelutil v0.3.2
+## explicit; go 1.22
+github.com/uptrace/opentelemetry-go-extra/otelutil
 # go.opentelemetry.io/otel v1.32.0
 ## explicit; go 1.22
 go.opentelemetry.io/otel
@@ -86,6 +92,10 @@ go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp/internal
 go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp/internal/envconfig
 go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp/internal/otlpconfig
 go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp/internal/retry
+# go.opentelemetry.io/otel/log v0.6.0
+## explicit; go 1.22
+go.opentelemetry.io/otel/log
+go.opentelemetry.io/otel/log/embedded
 # go.opentelemetry.io/otel/metric v1.32.0
 ## explicit; go 1.22
 go.opentelemetry.io/otel/metric
