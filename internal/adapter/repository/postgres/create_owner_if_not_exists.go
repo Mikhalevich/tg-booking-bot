@@ -13,11 +13,16 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
+var (
+	errOwnerAlreadyExists = errors.New("owner already exists")
+)
+
 func (p *Postgres) CreateOwnerIfNotExists(
 	ctx context.Context,
 	chatID int64,
-) (port.CreateOwnerIfNotExistsOutput, error) {
-	var output port.CreateOwnerIfNotExistsOutput
+) (int, error) {
+	var createdOwnerID int
+
 	if err := transaction.TransactionWithLevel(ctx, p.db, sql.LevelSerializable,
 		func(ctx context.Context, tx *sqlx.Tx) error {
 			ownerRoleID, err := p.roleIDByName(ctx, role.Owner, tx)
@@ -31,10 +36,7 @@ func (p *Postgres) CreateOwnerIfNotExists(
 			}
 
 			if isExists {
-				output = port.CreateOwnerIfNotExistsOutput{
-					IsAlreadyExists: true,
-				}
-				return nil
+				return errOwnerAlreadyExists
 			}
 
 			ownerID, err := p.createEmployeeWithoutVerification(ctx, ownerRoleID, chatID, tx)
@@ -42,16 +44,19 @@ func (p *Postgres) CreateOwnerIfNotExists(
 				return fmt.Errorf("create owner without verification: %w", err)
 			}
 
-			output = port.CreateOwnerIfNotExistsOutput{
-				CreatedOwnerID: ownerID,
-			}
+			createdOwnerID = ownerID
 
 			return nil
-		}); err != nil {
-		return output, fmt.Errorf("transaction: %w", err)
+		},
+	); err != nil {
+		return 0, fmt.Errorf("transaction: %w", err)
 	}
 
-	return output, nil
+	return createdOwnerID, nil
+}
+
+func (p *Postgres) IsOwnerAlreadyExists(err error) bool {
+	return errors.Is(err, errOwnerAlreadyExists)
 }
 
 func (p *Postgres) IsEmployeeWithRoleExists(

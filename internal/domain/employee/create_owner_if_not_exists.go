@@ -26,12 +26,20 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		return nil
 	}
 
-	createOwnerOutput, err := e.repository.CreateOwnerIfNotExists(ctx, info.ChatID)
-	if err != nil {
-		return fmt.Errorf("create owner: %w", err)
-	}
+	if err := e.repository.Transaction(
+		ctx,
+		func(ctx context.Context, tx port.EmployeeRepository) error {
+			if err := createOwnerIfNotExistsTx(ctx, tx, info.ChatID); err != nil {
+				return fmt.Errorf("create owner tx: %w", err)
+			}
 
-	if createOwnerOutput.IsAlreadyExists {
+			return nil
+		},
+	); err != nil {
+		if !e.repository.IsOwnerAlreadyExists(err) {
+			return fmt.Errorf("transaction: %w", err)
+		}
+
 		if err := e.sender.ReplyText(
 			ctx,
 			info.ChatID,
@@ -53,13 +61,26 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		return fmt.Errorf("created reply: %w", err)
 	}
 
-	actionPayload, err := actionpayload.BytesFromEmployeeID(createOwnerOutput.CreatedOwnerID)
+	return nil
+}
+
+func createOwnerIfNotExistsTx(
+	ctx context.Context,
+	tx port.EmployeeRepository,
+	chatID int64,
+) error {
+	createdOwnerID, err := tx.CreateOwnerIfNotExists(ctx, chatID)
+	if err != nil {
+		return fmt.Errorf("create owner: %w", err)
+	}
+
+	actionPayload, err := actionpayload.BytesFromEmployeeID(createdOwnerID)
 	if err != nil {
 		return fmt.Errorf("convert employee id to action payload: %w", err)
 	}
 
-	if err := e.repository.AddAction(ctx, &action.ActionInfo{
-		EmployeeID: createOwnerOutput.CreatedOwnerID,
+	if err := tx.AddAction(ctx, &action.ActionInfo{
+		EmployeeID: createdOwnerID,
 		Action:     action.EditEmployeeFirstName,
 		Payload:    actionPayload,
 		CreatedAt:  time.Now(),
