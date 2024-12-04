@@ -18,7 +18,7 @@ var (
 )
 
 type Postgres struct {
-	db *sqlx.DB
+	db sqlx.ExtContext
 }
 
 func New(db *sql.DB, driverName string) *Postgres {

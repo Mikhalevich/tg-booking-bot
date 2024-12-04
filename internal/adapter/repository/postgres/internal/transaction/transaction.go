@@ -13,7 +13,7 @@ type TxFunc func(ctx context.Context, tx *sqlx.Tx) error
 
 func Transaction(
 	ctx context.Context,
-	s *sqlx.DB,
+	s sqlx.ExtContext,
 	fn TxFunc,
 ) error {
 	return TransactionWithLevel(ctx, s, sql.LevelDefault, fn)
@@ -21,11 +21,16 @@ func Transaction(
 
 func TransactionWithLevel(
 	ctx context.Context,
-	s *sqlx.DB,
+	s sqlx.ExtContext,
 	level sql.IsolationLevel,
 	fn TxFunc,
 ) error {
-	tx, err := s.BeginTxx(ctx, &sql.TxOptions{
+	db, ok := s.(*sqlx.DB)
+	if !ok {
+		return errors.New("not sqlx db object")
+	}
+
+	tx, err := db.BeginTxx(ctx, &sql.TxOptions{
 		Isolation: level,
 	})
 	if err != nil {

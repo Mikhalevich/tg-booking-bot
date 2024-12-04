@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/jsonb"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
@@ -22,8 +24,9 @@ type scheduleTemplate struct {
 
 func (p *Postgres) GetAllTemplates(ctx context.Context) ([]port.ScheduleTemplate, error) {
 	var tmpls []scheduleTemplate
-	if err := p.db.SelectContext(
+	if err := sqlx.SelectContext(
 		ctx,
+		p.db,
 		&tmpls,
 		`SELECT
 			id,

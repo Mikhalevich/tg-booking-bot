@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/jsonb"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
@@ -14,8 +16,9 @@ func (p *Postgres) CreateTestScheduleTemplate(ctx context.Context, tmpl port.Sch
 		return fmt.Errorf("create jsonb from schedule: %w", err)
 	}
 
-	if _, err := p.db.NamedExecContext(
+	if _, err := sqlx.NamedExecContext(
 		ctx,
+		p.db,
 		`INSERT INTO schedule_template(
 			name,
 			description,

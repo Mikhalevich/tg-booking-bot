@@ -40,6 +40,7 @@ type EditNameInput struct {
 }
 
 type EmployeeRepository interface {
+	Transaction(ctx context.Context, fn func(ctx context.Context, tx EmployeeRepository) error) error
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
 	EditFirstName(ctx context.Context, nameInfo EditNameInput, nextAction *action.ActionInfo) error
 	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (CreateOwnerIfNotExistsOutput, error)
