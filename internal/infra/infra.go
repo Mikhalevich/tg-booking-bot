@@ -47,7 +47,7 @@ func StartScheduleBot(
 	postgresCfg config.Postgres,
 	logger logger.Logger,
 ) error {
-	b, err := bot.New(botAPItoken)
+	b, err := bot.New(botAPItoken, bot.WithSkipGetMe())
 	if err != nil {
 		return fmt.Errorf("creating bot: %w", err)
 	}
