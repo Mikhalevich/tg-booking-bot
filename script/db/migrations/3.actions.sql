@@ -19,10 +19,11 @@ CREATE TABLE actions(
     CONSTRAINT actions_employee_fk FOREIGN KEY(employee_id) REFERENCES employee(id)
 );
 
-CREATE INDEX actions_employee_id_is_completed_idx ON actions(employee_id, is_completed);
+CREATE INDEX actions_employee_id_is_completed_idx ON actions(employee_id, state);
 
 
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
-DROP TABLE actions;
 DROP INDEX actions_employee_id_is_completed_idx;
+DROP TABLE actions;
+DROP TYPE action_state;

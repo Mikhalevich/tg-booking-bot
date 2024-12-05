@@ -24,23 +24,23 @@ func addAction(
 				employee_id,
 				action,
 				payload,
-				is_completed,
+				state,
 				created_at
 			) VALUES (
 				:employee_id,
 				:action,
 				:payload,
-				:is_completed,
+				:state,
 				:created_at
 			)
 			RETURNING id
 		`,
 		map[string]any{
-			"employee_id":  info.EmployeeID,
-			"action":       info.Action,
-			"payload":      info.Payload,
-			"is_completed": false,
-			"created_at":   info.CreatedAt,
+			"employee_id": info.EmployeeID,
+			"action":      info.Action,
+			"payload":     info.Payload,
+			"state":       action.StateInProgress,
+			"created_at":  info.CreatedAt,
 		})
 
 	if err != nil {

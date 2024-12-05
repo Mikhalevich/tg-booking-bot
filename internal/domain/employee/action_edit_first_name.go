@@ -3,6 +3,7 @@ package employee
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/actionpayload"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
@@ -19,15 +20,24 @@ func (e *employee) actionEditFirstName(
 		return fmt.Errorf("convert payload to employee_id: %w", err)
 	}
 
-	if err := e.repository.EditFirstName(
+	if err := e.repository.Transaction(
 		ctx,
-		port.EditNameInput{
-			EmployeeID:        emplID.ID,
-			Name:              msgInfo.Text,
-			TriggeredActionID: actionInfo.ActionID,
+		port.TransactionLevelDefault,
+		func(ctx context.Context, tx port.EmployeeRepository) error {
+			now := time.Now()
+
+			if err := tx.UpdateFirstName(ctx, emplID.ID, msgInfo.Text, now); err != nil {
+				return fmt.Errorf("update first name: %w", err)
+			}
+
+			if err := tx.CompleteAction(ctx, actionInfo.ActionID, now); err != nil {
+				return fmt.Errorf("complete action: %w", err)
+			}
+
+			return nil
 		},
-		nil); err != nil {
-		return fmt.Errorf("edit first name: %w", err)
+	); err != nil {
+		return fmt.Errorf("transaction: %w", err)
 	}
 
 	return nil
