@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
@@ -24,8 +26,9 @@ type employee struct {
 
 func (p *Postgres) GetAllEmployee(ctx context.Context) ([]port.Employee, error) {
 	var empls []employee
-	if err := p.db.SelectContext(
+	if err := sqlx.SelectContext(
 		ctx,
+		p.db,
 		&empls,
 		`SELECT
 			employee.id,

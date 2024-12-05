@@ -6,13 +6,16 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
 func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.Employee, error) {
 	var emp employee
-	if err := p.db.GetContext(
+	if err := sqlx.GetContext(
 		ctx,
+		p.db,
 		&emp,
 		`SELECT
 			employee.id,
@@ -29,6 +32,10 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.
 		WHERE
 			employee.chat_id = $1
 	`, chatID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return port.Employee{}, errNotFound
+		}
+
 		return port.Employee{}, fmt.Errorf("select employee: %w", err)
 	}
 

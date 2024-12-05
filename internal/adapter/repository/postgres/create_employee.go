@@ -15,8 +15,9 @@ import (
 // CreateEmployee returns id of created employee.
 func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error) {
 	var roleID int
-	if err := p.db.GetContext(
+	if err := sqlx.GetContext(
 		ctx,
+		p.db,
 		&roleID,
 		`SELECT id
 		FROM role

@@ -27,26 +27,27 @@ type Employee struct {
 	UpdatedAt        time.Time
 }
 
-type CreateOwnerIfNotExistsOutput struct {
-	CreatedOwnerID  int
-	IsAlreadyExists bool
-}
+type TransactionLevel int
 
-type EditNameInput struct {
-	EmployeeID        int
-	Name              string
-	TriggeredActionID int
-	OperationTime     time.Time
-}
+const (
+	TransactionLevelDefault TransactionLevel = iota + 1
+	TransactionLevelSerializable
+)
 
+//nolint:interfacebloat
 type EmployeeRepository interface {
+	Transaction(ctx context.Context, level TransactionLevel,
+		fn func(ctx context.Context, tx EmployeeRepository) error) error
+	IsNotFoundError(err error) bool
+	IsNotUpdatedError(err error) bool
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
-	EditFirstName(ctx context.Context, nameInfo EditNameInput, nextAction *action.ActionInfo) error
-	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (CreateOwnerIfNotExistsOutput, error)
+	CreateEmployeeWithoutVerification(ctx context.Context, r role.Role, chatID int64) (int, error)
+	IsEmployeeWithRoleExists(ctx context.Context, role role.Role) (bool, error)
+	UpdateFirstName(ctx context.Context, id int, name string, updatedAt time.Time) error
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
-	IsEmployeeNotFoundError(err error) bool
-	AddAction(ctx context.Context, info *action.ActionInfo) error
-	GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
-	IsActionNotFoundError(err error) bool
+	AddAction(ctx context.Context, info *action.ActionInfo) (int, error)
+	GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
+	CompleteAction(ctx context.Context, id int, completedAt time.Time) error
+	CancelAction(ctx context.Context, id int, completedAt time.Time) error
 }

@@ -13,7 +13,7 @@ func (e *employee) EmployeeMiddleware(next port.Handler) port.Handler {
 		empl, err := e.repository.GetEmployeeByChatID(ctx, info.ChatID)
 
 		if err != nil {
-			if !e.repository.IsEmployeeNotFoundError(err) {
+			if !e.repository.IsNotFoundError(err) {
 				return fmt.Errorf("get employee by chat_id: %w", err)
 			}
 		} else {
