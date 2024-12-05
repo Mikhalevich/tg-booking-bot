@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/actionpayload"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/button"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
@@ -56,7 +57,11 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		ctx,
 		info.ChatID,
 		info.MessageID,
-		"created",
+		"Owner created. Please specify first name",
+		button.CancelButton("Cancel", button.ActionData{
+			ID:   123,
+			Type: button.ActionTypeCancel,
+		}),
 	); err != nil {
 		return fmt.Errorf("created reply: %w", err)
 	}
