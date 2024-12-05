@@ -21,23 +21,24 @@ var (
 func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.MessageInfo) error {
 	_, ok := ctxdata.Employee(ctx)
 	if ok {
-		if err := e.sender.ReplyText(
-			ctx,
-			info.ChatID,
-			info.MessageID,
-			"not allowed",
-		); err != nil {
+		if err := e.sender.ReplyText(ctx, info.ChatID, info.MessageID, "not allowed"); err != nil {
 			return fmt.Errorf("not allowed reply: %w", err)
 		}
 
 		return nil
 	}
 
+	var (
+		actionID int
+		err      error
+	)
+
 	if err := e.repository.Transaction(
 		ctx,
 		port.TransactionLevelSerializable,
 		func(ctx context.Context, tx port.EmployeeRepository) error {
-			if err := createOwnerIfNotExistsTx(ctx, tx, info.ChatID); err != nil {
+			actionID, err = createOwnerIfNotExistsTx(ctx, tx, info.ChatID)
+			if err != nil {
 				return fmt.Errorf("create owner tx: %w", err)
 			}
 
@@ -48,25 +49,17 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 			return fmt.Errorf("transaction: %w", err)
 		}
 
-		if err := e.sender.ReplyText(
-			ctx,
-			info.ChatID,
-			info.MessageID,
-			"owner already exists",
-		); err != nil {
+		if err := e.sender.ReplyText(ctx, info.ChatID, info.MessageID, "owner already exists"); err != nil {
 			return fmt.Errorf("owner exists reply: %w", err)
 		}
 
 		return nil
 	}
 
-	if err := e.sender.ReplyText(
-		ctx,
-		info.ChatID,
-		info.MessageID,
-		"Owner created. Please specify first name",
+	if err := e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
+		"Owner created. Please enter your first name",
 		button.CancelButton("Cancel", button.ActionData{
-			ID:   123,
+			ID:   actionID,
 			Type: button.ActionTypeCancel,
 		}),
 	); err != nil {
@@ -80,34 +73,36 @@ func createOwnerIfNotExistsTx(
 	ctx context.Context,
 	tx port.EmployeeRepository,
 	chatID int64,
-) error {
+) (int, error) {
 	isExists, err := tx.IsEmployeeWithRoleExists(ctx, role.Owner)
 	if err != nil {
-		return fmt.Errorf("is owner exists: %w", err)
+		return 0, fmt.Errorf("is owner exists: %w", err)
 	}
 
 	if isExists {
-		return errOwnerAlreadyExists
+		return 0, errOwnerAlreadyExists
 	}
 
 	createdOwnerID, err := tx.CreateEmployeeWithoutVerification(ctx, role.Owner, chatID)
 	if err != nil {
-		return fmt.Errorf("create owner: %w", err)
+		return 0, fmt.Errorf("create owner: %w", err)
 	}
 
 	actionPayload, err := actionpayload.BytesFromEmployeeID(createdOwnerID)
 	if err != nil {
-		return fmt.Errorf("convert employee id to action payload: %w", err)
+		return 0, fmt.Errorf("convert employee id to action payload: %w", err)
 	}
 
-	if err := tx.AddAction(ctx, &action.ActionInfo{
+	actionID, err := tx.AddAction(ctx, &action.ActionInfo{
 		EmployeeID: createdOwnerID,
 		Action:     action.EditEmployeeFirstName,
 		Payload:    actionPayload,
 		CreatedAt:  time.Now(),
-	}); err != nil {
-		return fmt.Errorf("edit employee first name action: %w", err)
+	})
+
+	if err != nil {
+		return 0, fmt.Errorf("edit employee first name action: %w", err)
 	}
 
-	return nil
+	return actionID, nil
 }

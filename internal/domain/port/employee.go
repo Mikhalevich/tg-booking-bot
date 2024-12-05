@@ -52,7 +52,7 @@ type EmployeeRepository interface {
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
 	IsEmployeeNotFoundError(err error) bool
-	AddAction(ctx context.Context, info *action.ActionInfo) error
+	AddAction(ctx context.Context, info *action.ActionInfo) (int, error)
 	GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
 	IsActionNotFoundError(err error) bool
 }

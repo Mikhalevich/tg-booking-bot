@@ -40,7 +40,7 @@ func (p *Postgres) EditFirstName(
 			}
 
 			if nextAction != nil {
-				if err := p.addAction(ctx, tx, nextAction); err != nil {
+				if _, err := addAction(ctx, tx, nextAction); err != nil {
 					return fmt.Errorf("add next action: %w", err)
 				}
 			}
