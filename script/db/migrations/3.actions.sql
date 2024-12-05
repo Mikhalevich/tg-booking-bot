@@ -1,11 +1,18 @@
 -- +migrate Up
 -- SQL in section 'Up' is executed when this migration is applied
+
+CREATE TYPE action_state AS ENUM(
+    'in_progress',
+    'completed',
+    'canceled'
+);
+
 CREATE TABLE actions(
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     employee_id INTEGER NOT NULL,
     action TEXT NOT NULL,
     payload JSONB NOT NULL,
-    is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    state action_state NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     completed_at TIMESTAMPTZ,
 

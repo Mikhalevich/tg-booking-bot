@@ -27,9 +27,9 @@ func (e *employee) nextNotCompletedAction(
 	ctx context.Context,
 	employeeID int,
 ) (action.ActionInfo, bool, error) {
-	info, err := e.repository.GetNextNotCompletedAction(ctx, employeeID)
+	info, err := e.repository.GetNextInProgressAction(ctx, employeeID)
 	if err != nil {
-		if e.repository.IsActionNotFoundError(err) {
+		if e.repository.IsNotFoundError(err) {
 			return action.ActionInfo{}, false, nil
 		}
 

@@ -32,6 +32,10 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.
 		WHERE
 			employee.chat_id = $1
 	`, chatID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return port.Employee{}, errNotFound
+		}
+
 		return port.Employee{}, fmt.Errorf("select employee: %w", err)
 	}
 

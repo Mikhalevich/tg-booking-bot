@@ -45,14 +45,14 @@ const (
 type EmployeeRepository interface {
 	Transaction(ctx context.Context, level TransactionLevel,
 		fn func(ctx context.Context, tx EmployeeRepository) error) error
+	IsNotFoundError(err error) bool
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
 	CreateEmployeeWithoutVerification(ctx context.Context, r role.Role, chatID int64) (int, error)
 	IsEmployeeWithRoleExists(ctx context.Context, role role.Role) (bool, error)
 	EditFirstName(ctx context.Context, nameInfo EditNameInput, nextAction *action.ActionInfo) error
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
-	IsEmployeeNotFoundError(err error) bool
 	AddAction(ctx context.Context, info *action.ActionInfo) (int, error)
-	GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
-	IsActionNotFoundError(err error) bool
+	GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
+	CompleteAction(ctx context.Context, id int, completedAt time.Time) error
 }

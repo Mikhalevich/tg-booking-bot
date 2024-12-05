@@ -15,24 +15,26 @@ type actionInfo struct {
 	ActionID int           `db:"id"`
 	Action   action.Action `db:"action"`
 	Payload  []byte        `db:"payload"`
+	State    action.State  `db:"state"`
 }
 
-func (p *Postgres) GetNextNotCompletedAction(ctx context.Context, employeeID int) (action.ActionInfo, error) {
+func (p *Postgres) GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error) {
 	query, args, err := sqlx.Named(`
 		SELECT
 			id,
 			action,
-			payload
+			payload,
+			state
 		FROM
 			actions
 		WHERE
 			employee_id = :employee_id AND
-			is_completed = :is_completed
+			state = :state_in_progress
 		ORDER BY created_at
 		LIMIT 1
 	`, map[string]any{
-		"employee_id":  employeeID,
-		"is_completed": false,
+		"employee_id":       employeeID,
+		"state_in_progress": action.StateInProgress,
 	})
 
 	if err != nil {
@@ -41,6 +43,10 @@ func (p *Postgres) GetNextNotCompletedAction(ctx context.Context, employeeID int
 
 	var info actionInfo
 	if err := sqlx.GetContext(ctx, p.db, &info, p.db.Rebind(query), args...); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return action.ActionInfo{}, errNotFound
+		}
+
 		return action.ActionInfo{}, fmt.Errorf("select context: %w", err)
 	}
 
@@ -48,9 +54,6 @@ func (p *Postgres) GetNextNotCompletedAction(ctx context.Context, employeeID int
 		ActionID: info.ActionID,
 		Action:   info.Action,
 		Payload:  info.Payload,
+		State:    info.State,
 	}, nil
-}
-
-func (p *Postgres) IsActionNotFoundError(err error) bool {
-	return errors.Is(err, sql.ErrNoRows)
 }
