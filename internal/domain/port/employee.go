@@ -34,13 +34,21 @@ type EditNameInput struct {
 	OperationTime     time.Time
 }
 
+type TransactionLevel int
+
+const (
+	TransactionLevelDefault TransactionLevel = iota + 1
+	TransactionLevelSerializable
+)
+
 //nolint:interfacebloat
 type EmployeeRepository interface {
-	Transaction(ctx context.Context, fn func(ctx context.Context, tx EmployeeRepository) error) error
+	Transaction(ctx context.Context, level TransactionLevel,
+		fn func(ctx context.Context, tx EmployeeRepository) error) error
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
+	CreateEmployeeWithoutVerification(ctx context.Context, r role.Role, chatID int64) (int, error)
+	IsEmployeeWithRoleExists(ctx context.Context, role role.Role) (bool, error)
 	EditFirstName(ctx context.Context, nameInfo EditNameInput, nextAction *action.ActionInfo) error
-	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error)
-	IsOwnerAlreadyExists(err error) bool
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
 	IsEmployeeNotFoundError(err error) bool

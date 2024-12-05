@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -16,13 +17,26 @@ func newFromTransaction(tx *sqlx.Tx) *Postgres {
 	}
 }
 
+func toSQLIsolationLevel(level port.TransactionLevel) sql.IsolationLevel {
+	switch level {
+	case port.TransactionLevelDefault:
+		return sql.LevelDefault
+	case port.TransactionLevelSerializable:
+		return sql.LevelSerializable
+	}
+
+	return sql.LevelDefault
+}
+
 func (p *Postgres) Transaction(
 	ctx context.Context,
+	level port.TransactionLevel,
 	fn func(ctx context.Context, tx port.EmployeeRepository) error,
 ) error {
-	if err := transaction.Transaction(
+	if err := transaction.TransactionWithLevel(
 		ctx,
 		p.db,
+		toSQLIsolationLevel(level),
 		func(ctx context.Context, tx *sqlx.Tx) error {
 			return fn(ctx, newFromTransaction(tx))
 		},

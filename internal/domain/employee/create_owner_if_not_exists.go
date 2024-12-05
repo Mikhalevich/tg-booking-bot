@@ -2,6 +2,7 @@ package employee
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +11,11 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
+)
+
+var (
+	errOwnerAlreadyExists = errors.New("owner already exists")
 )
 
 func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.MessageInfo) error {
@@ -29,6 +35,7 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 
 	if err := e.repository.Transaction(
 		ctx,
+		port.TransactionLevelSerializable,
 		func(ctx context.Context, tx port.EmployeeRepository) error {
 			if err := createOwnerIfNotExistsTx(ctx, tx, info.ChatID); err != nil {
 				return fmt.Errorf("create owner tx: %w", err)
@@ -37,7 +44,7 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 			return nil
 		},
 	); err != nil {
-		if !e.repository.IsOwnerAlreadyExists(err) {
+		if !errors.Is(err, errOwnerAlreadyExists) {
 			return fmt.Errorf("transaction: %w", err)
 		}
 
@@ -74,7 +81,16 @@ func createOwnerIfNotExistsTx(
 	tx port.EmployeeRepository,
 	chatID int64,
 ) error {
-	createdOwnerID, err := tx.CreateOwnerIfNotExists(ctx, chatID)
+	isExists, err := tx.IsEmployeeWithRoleExists(ctx, role.Owner)
+	if err != nil {
+		return fmt.Errorf("is owner exists: %w", err)
+	}
+
+	if isExists {
+		return errOwnerAlreadyExists
+	}
+
+	createdOwnerID, err := tx.CreateEmployeeWithoutVerification(ctx, role.Owner, chatID)
 	if err != nil {
 		return fmt.Errorf("create owner: %w", err)
 	}

@@ -27,7 +27,7 @@ func New(db *sql.DB, driverName string) *Postgres {
 	}
 }
 
-func (p *Postgres) roleIDByName(ctx context.Context, r role.Role, db sqlx.QueryerContext) (int, error) {
+func roleIDByName(ctx context.Context, r role.Role, db sqlx.QueryerContext) (int, error) {
 	var roleID int
 	if err := sqlx.GetContext(
 		ctx,
