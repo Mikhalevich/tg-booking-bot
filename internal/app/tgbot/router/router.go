@@ -16,6 +16,7 @@ type Middleware func(next port.Handler) port.Handler
 type Register interface {
 	AddExactTextRoute(pattern string, handler port.Handler)
 	AddDefaultTextHandler(handler port.Handler)
+	AddDefaultCallbackQueryHander(h port.Handler)
 	AddMiddleware(middleware Middleware)
 	MiddlewareGroup(fn func(r Register))
 }
@@ -48,7 +49,7 @@ func (r *Router) AddExactTextRoute(pattern string, handler port.Handler) {
 		bot.HandlerTypeMessageText,
 		pattern,
 		bot.MatchTypeExact,
-		r.wrapTextHandler(pattern, handler),
+		r.wrapHandler(pattern, handler),
 	)
 }
 
@@ -57,7 +58,16 @@ func (r *Router) AddDefaultTextHandler(h port.Handler) {
 		bot.HandlerTypeMessageText,
 		"",
 		bot.MatchTypePrefix,
-		r.wrapTextHandler("default_handler", h),
+		r.wrapHandler("default_text_handler", h),
+	)
+}
+
+func (r *Router) AddDefaultCallbackQueryHander(h port.Handler) {
+	r.bot.RegisterHandler(
+		bot.HandlerTypeCallbackQueryData,
+		"",
+		bot.MatchTypePrefix,
+		r.wrapHandler("default_callback_query", h),
 	)
 }
 
@@ -65,30 +75,25 @@ func (r *Router) AddMiddleware(m Middleware) {
 	r.middlewares = append(r.middlewares, m)
 }
 
-func (r *Router) wrapTextHandler(pattern string, h port.Handler) bot.HandlerFunc {
+func (r *Router) wrapHandler(pattern string, h port.Handler) bot.HandlerFunc {
 	h = r.applyMiddleware(h)
 
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		ctx, span := tracing.StartSpanName(ctx, pattern)
 		defer span.End()
 
-		if err := h(
-			ctx,
-			port.MessageInfo{
-				MessageID: update.Message.ID,
-				ChatID:    update.Message.Chat.ID,
-				Text:      update.Message.Text,
-			},
-		); err != nil {
+		msgInfo := makeMsgInfoFromUpdate(update)
+
+		if err := h(ctx, msgInfo); err != nil {
 			r.logger.WithContext(ctx).
 				WithError(err).
 				WithField("endpoint", pattern).
 				Error("error while processing message")
 
 			if _, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
+				ChatID: msgInfo.ChatID,
 				ReplyParameters: &models.ReplyParameters{
-					MessageID: update.Message.ID,
+					MessageID: msgInfo.MessageID,
 				},
 				Text: "internal error",
 			}); err != nil {
@@ -107,4 +112,34 @@ func (r *Router) applyMiddleware(h port.Handler) port.Handler {
 	}
 
 	return h
+}
+
+func makeMsgInfoFromUpdate(u *models.Update) port.MessageInfo {
+	if u.Message != nil {
+		return port.MessageInfo{
+			MessageID: u.Message.ID,
+			ChatID:    u.Message.Chat.ID,
+			Text:      u.Message.Text,
+		}
+	}
+
+	if u.CallbackQuery != nil {
+		if u.CallbackQuery.Message.Message != nil {
+			return port.MessageInfo{
+				MessageID: u.CallbackQuery.Message.Message.ID,
+				ChatID:    u.CallbackQuery.Message.Message.Chat.ID,
+				Data:      u.CallbackQuery.Data,
+			}
+		}
+
+		if u.CallbackQuery.Message.InaccessibleMessage != nil {
+			return port.MessageInfo{
+				MessageID: u.CallbackQuery.Message.InaccessibleMessage.MessageID,
+				ChatID:    u.CallbackQuery.Message.InaccessibleMessage.Chat.ID,
+				Data:      u.CallbackQuery.Data,
+			}
+		}
+	}
+
+	return port.MessageInfo{}
 }
