@@ -12,6 +12,7 @@ type Employer interface {
 	CreateOwnerIfNotExists(ctx context.Context, msgInfo port.MessageInfo) error
 	GetAllEmployee(ctx context.Context, msgInfo port.MessageInfo) error
 	ProcessNextAction(ctx context.Context, msgInfo port.MessageInfo) error
+	ProcessCallbackQuery(ctx context.Context, msgInfo port.MessageInfo) error
 	EmployeeMiddleware(next port.Handler) port.Handler
 	RegistrationMiddleware(next port.Handler) port.Handler
 }
@@ -31,6 +32,7 @@ func EmployeeRoutes(e Employer) RouteRegisterFunc {
 			r.AddExactTextRoute("/makemeowner", e.CreateOwnerIfNotExists)
 
 			r.AddDefaultTextHandler(e.ProcessNextAction)
+			r.AddDefaultCallbackQueryHander(e.ProcessCallbackQuery)
 		})
 	}
 }

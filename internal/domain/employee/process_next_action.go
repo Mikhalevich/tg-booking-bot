@@ -33,6 +33,8 @@ func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageIn
 		); err != nil {
 			return fmt.Errorf("reply text no action required: %w", err)
 		}
+
+		return nil
 	}
 
 	if err := e.processAction(ctx, msgInfo, actionInfo); err != nil {
