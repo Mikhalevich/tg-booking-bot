@@ -6,12 +6,11 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/actionpayload"
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/button"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
-func (e *employee) actionEditFirstName(
+func (e *employee) actionEditLastName(
 	ctx context.Context,
 	msgInfo port.MessageInfo,
 	actionInfo action.ActionInfo,
@@ -21,28 +20,19 @@ func (e *employee) actionEditFirstName(
 		return fmt.Errorf("convert payload to employee_id: %w", err)
 	}
 
-	var actionID int
-
 	if err := e.repository.Transaction(
 		ctx,
 		port.TransactionLevelDefault,
 		func(ctx context.Context, tx port.EmployeeRepository) error {
 			now := time.Now()
 
-			if err := tx.UpdateFirstName(ctx, emplID.ID, msgInfo.Text, now); err != nil {
-				return fmt.Errorf("update first name: %w", err)
+			if err := tx.UpdateLastName(ctx, emplID.ID, msgInfo.Text, now); err != nil {
+				return fmt.Errorf("update last name: %w", err)
 			}
 
 			if err := tx.CompleteAction(ctx, actionInfo.ActionID, now); err != nil {
 				return fmt.Errorf("complete action: %w", err)
 			}
-
-			actionID, err = tx.AddAction(ctx, &action.ActionInfo{
-				EmployeeID: actionInfo.EmployeeID,
-				Action:     action.EditEmployeeLastName,
-				Payload:    actionInfo.Payload,
-				CreatedAt:  time.Now(),
-			})
 
 			return nil
 		},
@@ -51,12 +41,7 @@ func (e *employee) actionEditFirstName(
 	}
 
 	e.sender.ReplyText(ctx, msgInfo.ChatID, msgInfo.MessageID,
-		"First name edited successfully. Please enter your first name",
-		button.CancelButton("Cancel", button.ActionData{
-			ID:   actionID,
-			Type: button.ActionTypeCancel,
-		}),
-	)
+		"Last name edited successfully")
 
 	return nil
 }
