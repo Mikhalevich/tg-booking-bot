@@ -15,6 +15,7 @@ type Employer interface {
 	ProcessCallbackQuery(ctx context.Context, msgInfo port.MessageInfo) error
 	EmployeeMiddleware(next port.Handler) port.Handler
 	RegistrationMiddleware(next port.Handler) port.Handler
+	NotCompletedActionMiddleware(next port.Handler) port.Handler
 }
 
 func EmployeeRoutes(e Employer) RouteRegisterFunc {
@@ -24,6 +25,7 @@ func EmployeeRoutes(e Employer) RouteRegisterFunc {
 
 			r.MiddlewareGroup(func(r router.Register) {
 				r.AddMiddleware(e.RegistrationMiddleware)
+				r.AddMiddleware(e.NotCompletedActionMiddleware)
 
 				r.AddExactTextRoute("/createemployee", e.CreateEmployee)
 				r.AddExactTextRoute("/getallemployee", e.GetAllEmployee)
