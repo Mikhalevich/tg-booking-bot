@@ -51,9 +51,10 @@ func (p *Postgres) GetNextInProgressAction(ctx context.Context, employeeID int) 
 	}
 
 	return action.ActionInfo{
-		ActionID: info.ActionID,
-		Action:   info.Action,
-		Payload:  info.Payload,
-		State:    info.State,
+		ActionID:   info.ActionID,
+		EmployeeID: employeeID,
+		Action:     info.Action,
+		Payload:    info.Payload,
+		State:      info.State,
 	}, nil
 }
