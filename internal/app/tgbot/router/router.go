@@ -82,13 +82,14 @@ func (r *Router) wrapHandler(pattern string, h port.Handler) bot.HandlerFunc {
 		ctx, span := tracing.StartSpanName(ctx, pattern)
 		defer span.End()
 
-		msgInfo := makeMsgInfoFromUpdate(update)
+		var (
+			msgInfo = makeMsgInfoFromUpdate(update)
+			log     = r.logger.WithContext(ctx).WithField("endpoint", pattern)
+			ctxLog  = logger.WithLogger(ctx, log)
+		)
 
-		if err := h(ctx, msgInfo); err != nil {
-			r.logger.WithContext(ctx).
-				WithError(err).
-				WithField("endpoint", pattern).
-				Error("error while processing message")
+		if err := h(ctxLog, msgInfo); err != nil {
+			log.WithError(err).Error("error while processing message")
 
 			if _, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: msgInfo.ChatID,
@@ -97,10 +98,7 @@ func (r *Router) wrapHandler(pattern string, h port.Handler) bot.HandlerFunc {
 				},
 				Text: "internal error",
 			}); err != nil {
-				r.logger.WithContext(ctx).
-					WithError(err).
-					WithField("endpoint", pattern).
-					Error("send internal error message")
+				log.WithError(err).Error("send internal error message")
 			}
 		}
 	}

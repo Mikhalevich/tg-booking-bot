@@ -13,15 +13,15 @@ const (
 func FromContext(ctx context.Context) Logger {
 	v := ctx.Value(contextLogger)
 	if v == nil {
-		return StdLogger()
+		return StdLogger().WithContext(ctx)
 	}
 
 	l, ok := v.(Logger)
 	if !ok {
-		return StdLogger()
+		return StdLogger().WithContext(ctx)
 	}
 
-	return l
+	return l.WithContext(ctx)
 }
 
 func WithLogger(ctx context.Context, l Logger) context.Context {

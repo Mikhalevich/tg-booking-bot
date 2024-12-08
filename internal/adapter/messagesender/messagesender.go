@@ -2,12 +2,12 @@ package messagesender
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 )
 
 var _ port.MessageSender = (*messageSender)(nil)
@@ -28,7 +28,7 @@ func (m *messageSender) ReplyText(
 	replyToMsgID int,
 	text string,
 	buttons ...port.Button,
-) error {
+) {
 	if _, err := m.bot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: chatID,
 		ReplyParameters: &models.ReplyParameters{
@@ -37,10 +37,11 @@ func (m *messageSender) ReplyText(
 		Text:        text,
 		ReplyMarkup: makeButtonsMarkup(buttons...),
 	}); err != nil {
-		return fmt.Errorf("send message: %w", err)
+		logger.FromContext(ctx).
+			WithError(err).
+			WithField("text_plain", text).
+			Error("failed to reply text")
 	}
-
-	return nil
 }
 
 func makeButtonsMarkup(buttons ...port.Button) models.ReplyMarkup {
@@ -63,7 +64,7 @@ func makeButtonsMarkup(buttons ...port.Button) models.ReplyMarkup {
 	}
 }
 
-func (m *messageSender) ReplyTextMarkdown(ctx context.Context, chatID int64, replyToMsgID int, text string) error {
+func (m *messageSender) ReplyTextMarkdown(ctx context.Context, chatID int64, replyToMsgID int, text string) {
 	if _, err := m.bot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: chatID,
 		ReplyParameters: &models.ReplyParameters{
@@ -72,10 +73,11 @@ func (m *messageSender) ReplyTextMarkdown(ctx context.Context, chatID int64, rep
 		ParseMode: models.ParseModeMarkdown,
 		Text:      text,
 	}); err != nil {
-		return fmt.Errorf("send message: %w", err)
+		logger.FromContext(ctx).
+			WithError(err).
+			WithField("text_markdown", text).
+			Error("failed to reply text markdown")
 	}
-
-	return nil
 }
 
 func (m *messageSender) EscapeMarkdown(s string) string {

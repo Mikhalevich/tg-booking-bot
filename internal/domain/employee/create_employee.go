@@ -21,14 +21,9 @@ func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) er
 		return fmt.Errorf("create employee: %w", err)
 	}
 
-	if err := e.sender.ReplyTextMarkdown(
-		ctx,
-		info.ChatID,
-		info.MessageID,
+	e.sender.ReplyTextMarkdown(ctx, info.ChatID, info.MessageID,
 		fmt.Sprintf("sent this code to user to complete registration: _%s_", e.sender.EscapeMarkdown(verificationCode)),
-	); err != nil {
-		return fmt.Errorf("reply text markdown: %w", err)
-	}
+	)
 
 	currentEmployee, err := e.repository.GetEmployeeByChatID(ctx, info.ChatID)
 	if err != nil {
