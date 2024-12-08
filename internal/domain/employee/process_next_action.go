@@ -52,7 +52,7 @@ func (e *employee) processAction(
 	case action.EditEmployeeFirstName:
 		err = e.actionEditFirstName(ctx, msgInfo, actionInfo)
 	case action.EditEmployeeLastName:
-		err = errors.New("not implemented")
+		err = e.actionEditLastName(ctx, msgInfo, actionInfo)
 	default:
 		err = errors.New("invalid action")
 	}

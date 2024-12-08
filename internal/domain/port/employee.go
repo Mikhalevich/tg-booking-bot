@@ -44,6 +44,7 @@ type EmployeeRepository interface {
 	CreateEmployeeWithoutVerification(ctx context.Context, r role.Role, chatID int64) (int, error)
 	IsEmployeeWithRoleExists(ctx context.Context, role role.Role) (bool, error)
 	UpdateFirstName(ctx context.Context, id int, name string, updatedAt time.Time) error
+	UpdateLastName(ctx context.Context, id int, name string, updatedAt time.Time) error
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
 	AddAction(ctx context.Context, info *action.ActionInfo) (int, error)
