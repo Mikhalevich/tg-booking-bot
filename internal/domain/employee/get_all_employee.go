@@ -15,14 +15,7 @@ func (e *employee) GetAllEmployee(ctx context.Context, info port.MessageInfo) er
 		return fmt.Errorf("get all employee: %w", err)
 	}
 
-	if err := e.sender.ReplyTextMarkdown(
-		ctx,
-		info.ChatID,
-		info.MessageID,
-		e.formatEmployeeMsg(empls),
-	); err != nil {
-		return fmt.Errorf("reply text markdown: %w", err)
-	}
+	e.sender.ReplyTextMarkdown(ctx, info.ChatID, info.MessageID, e.formatEmployeeMsg(empls))
 
 	return nil
 }

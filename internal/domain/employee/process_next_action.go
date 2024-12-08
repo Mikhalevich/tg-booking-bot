@@ -26,14 +26,7 @@ func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageIn
 	}
 
 	if !ok {
-		if err := e.sender.ReplyText(
-			ctx, msgInfo.ChatID,
-			msgInfo.MessageID,
-			"no action required",
-		); err != nil {
-			return fmt.Errorf("reply text no action required: %w", err)
-		}
-
+		e.sender.ReplyText(ctx, msgInfo.ChatID, msgInfo.MessageID, "no action required")
 		return nil
 	}
 

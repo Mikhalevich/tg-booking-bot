@@ -15,27 +15,12 @@ func (s *schedule) GetAllTemplates(ctx context.Context, info port.MessageInfo) e
 	}
 
 	if len(tmpls) == 0 {
-		if err := s.sender.ReplyText(
-			ctx,
-			info.ChatID,
-			info.MessageID,
-			"no schedule templates",
-		); err != nil {
-			return fmt.Errorf("reply to message empty: %w", err)
-		}
-
+		s.sender.ReplyText(ctx, info.ChatID, info.MessageID, "no schedule templates")
 		return nil
 	}
 
 	for _, tmpl := range tmpls {
-		if err := s.sender.ReplyTextMarkdown(
-			ctx,
-			info.ChatID,
-			info.MessageID,
-			s.convertScheduleToString(tmpl),
-		); err != nil {
-			return fmt.Errorf("reply message template: %w", err)
-		}
+		s.sender.ReplyTextMarkdown(ctx, info.ChatID, info.MessageID, s.convertScheduleToString(tmpl))
 	}
 
 	return nil

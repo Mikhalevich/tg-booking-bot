@@ -40,14 +40,7 @@ func (e *employee) actionEditFirstName(
 		return fmt.Errorf("transaction: %w", err)
 	}
 
-	if err := e.sender.ReplyText(
-		ctx,
-		msgInfo.ChatID,
-		msgInfo.MessageID,
-		"First name edited successfully",
-	); err != nil {
-		return fmt.Errorf("reply text: %w", err)
-	}
+	e.sender.ReplyText(ctx, msgInfo.ChatID, msgInfo.MessageID, "First name edited successfully")
 
 	return nil
 }

@@ -21,10 +21,7 @@ var (
 func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.MessageInfo) error {
 	_, ok := ctxdata.Employee(ctx)
 	if ok {
-		if err := e.sender.ReplyText(ctx, info.ChatID, info.MessageID, "not allowed"); err != nil {
-			return fmt.Errorf("not allowed reply: %w", err)
-		}
-
+		e.sender.ReplyText(ctx, info.ChatID, info.MessageID, "not allowed")
 		return nil
 	}
 
@@ -49,22 +46,18 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 			return fmt.Errorf("transaction: %w", err)
 		}
 
-		if err := e.sender.ReplyText(ctx, info.ChatID, info.MessageID, "owner already exists"); err != nil {
-			return fmt.Errorf("owner exists reply: %w", err)
-		}
+		e.sender.ReplyText(ctx, info.ChatID, info.MessageID, "owner already exists")
 
 		return nil
 	}
 
-	if err := e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
+	e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
 		"Owner created. Please enter your first name",
 		button.CancelButton("Cancel", button.ActionData{
 			ID:   actionID,
 			Type: button.ActionTypeCancel,
 		}),
-	); err != nil {
-		return fmt.Errorf("created reply: %w", err)
-	}
+	)
 
 	return nil
 }
