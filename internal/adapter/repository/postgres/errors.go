@@ -5,8 +5,9 @@ import (
 )
 
 var (
-	errNotFound   = errors.New("not found")
-	errNotUpdated = errors.New("not updated")
+	errNotFound      = errors.New("not found")
+	errNotUpdated    = errors.New("not updated")
+	errAlreadyExists = errors.New("already exists")
 )
 
 func (p *Postgres) IsNotFoundError(err error) bool {
@@ -15,4 +16,8 @@ func (p *Postgres) IsNotFoundError(err error) bool {
 
 func (p *Postgres) IsNotUpdatedError(err error) bool {
 	return errors.Is(err, errNotUpdated)
+}
+
+func (p *Postgres) IsAlreadyExistsError(err error) bool {
+	return errors.Is(err, errAlreadyExists)
 }
