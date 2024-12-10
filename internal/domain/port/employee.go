@@ -27,17 +27,9 @@ type Employee struct {
 	UpdatedAt        time.Time
 }
 
-type TransactionLevel int
-
-const (
-	TransactionLevelDefault TransactionLevel = iota + 1
-	TransactionLevelSerializable
-)
-
 //nolint:interfacebloat
 type EmployeeRepository interface {
-	Transaction(ctx context.Context, level TransactionLevel,
-		fn func(ctx context.Context, tx EmployeeRepository) error) error
+	Transaction(ctx context.Context, fn func(ctx context.Context, tx EmployeeRepository) error) error
 	IsNotFoundError(err error) bool
 	IsNotUpdatedError(err error) bool
 	IsAlreadyExistsError(err error) bool

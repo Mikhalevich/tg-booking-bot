@@ -2,44 +2,27 @@ package transaction
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type TxFunc func(ctx context.Context, tx *sqlx.Tx) error
+type TxFunc func(ctx context.Context, tx sqlx.ExtContext) error
 
 func Transaction(
 	ctx context.Context,
 	s sqlx.ExtContext,
+	allowNestedTransaction bool,
 	fn TxFunc,
 ) error {
-	return TransactionWithLevel(ctx, s, sql.LevelDefault, fn)
-}
-
-func TransactionWithLevel(
-	ctx context.Context,
-	s sqlx.ExtContext,
-	level sql.IsolationLevel,
-	fn TxFunc,
-) error {
-	db, ok := s.(*sqlx.DB)
-	if !ok {
-		return errors.New("not sqlx db object")
-	}
-
-	tx, err := db.BeginTxx(ctx, &sql.TxOptions{
-		Isolation: level,
-	})
+	tx, err := beginTx(ctx, s, allowNestedTransaction)
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
 	}
 
 	defer func() {
-		//nolint:errcheck
-		tx.Rollback()
+		tx.DeferCleanup()
 	}()
 
 	if err := fn(ctx, tx); err != nil {
@@ -55,4 +38,24 @@ func TransactionWithLevel(
 	}
 
 	return nil
+}
+
+func beginTx(ctx context.Context, s sqlx.ExtContext, allowNestedTransaction bool) (*Tx, error) {
+	db, ok := s.(*sqlx.DB)
+	if !ok {
+		if allowNestedTransaction {
+			if tx, ok := s.(*Tx); ok {
+				return NewNestedTx(tx.Tx), nil
+			}
+		}
+
+		return nil, errors.New("not sqlx db object")
+	}
+
+	tx, err := db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("begin tx: %w", err)
+	}
+
+	return NewTx(tx), nil
 }

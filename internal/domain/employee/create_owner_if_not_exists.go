@@ -23,7 +23,6 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 
 	if err := e.repository.Transaction(
 		ctx,
-		port.TransactionLevelSerializable,
 		func(ctx context.Context, tx port.EmployeeRepository) error {
 			createdOwnerID, err := tx.CreateOwnerIfNotExists(ctx, info.ChatID)
 			if err != nil {

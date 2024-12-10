@@ -15,7 +15,7 @@ import (
 func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error) {
 	var ownerID int
 
-	if err := transaction.Transaction(ctx, p.db, func(ctx context.Context, tx *sqlx.Tx) error {
+	if err := transaction.Transaction(ctx, p.db, true, func(ctx context.Context, tx sqlx.ExtContext) error {
 		if _, err := tx.ExecContext(ctx, `LOCK TABLE employee IN SHARE ROW EXCLUSIVE MODE`); err != nil {
 			return fmt.Errorf("lock table: %w", err)
 		}

@@ -25,7 +25,6 @@ func (e *employee) actionEditFirstName(
 
 	if err := e.repository.Transaction(
 		ctx,
-		port.TransactionLevelDefault,
 		func(ctx context.Context, tx port.EmployeeRepository) error {
 			now := time.Now()
 
