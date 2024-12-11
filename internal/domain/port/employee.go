@@ -15,6 +15,10 @@ const (
 	EmployeeStateRegistered           EmployeeState = "registered"
 )
 
+func (e EmployeeState) String() string {
+	return string(e)
+}
+
 type Employee struct {
 	ID               int
 	FirstName        string
@@ -41,6 +45,7 @@ type EmployeeRepository interface {
 	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
 	AddAction(ctx context.Context, info *action.ActionInfo) (int, error)
 	GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
+	CodeVerification(ctx context.Context, code string, chatID int64) (*Employee, error)
 	CompleteAction(ctx context.Context, id int, completedAt time.Time) error
 	CancelAction(ctx context.Context, id int, completedAt time.Time) error
 }
