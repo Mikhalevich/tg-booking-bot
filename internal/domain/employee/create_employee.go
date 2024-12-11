@@ -60,7 +60,7 @@ func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) er
 	}
 
 	e.sender.ReplyTextMarkdown(ctx, info.ChatID, info.MessageID,
-		fmt.Sprintf("Sent this code to user to complete registration: _%s_", e.sender.EscapeMarkdown(verificationCode)),
+		fmt.Sprintf("Sent this code to user to complete registration: `%s`", e.sender.EscapeMarkdown(verificationCode)),
 	)
 
 	e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
