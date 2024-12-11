@@ -13,7 +13,7 @@ import (
 func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageInfo) error {
 	empl, ok := ctxdata.Employee(ctx)
 	if !ok {
-		if err := e.processVerificationCode(ctx, msgInfo.ChatID, msgInfo.Text); err != nil {
+		if err := e.actionCodeVerification(ctx, msgInfo.ChatID, msgInfo.MessageID, msgInfo.Text); err != nil {
 			return fmt.Errorf("process verification code: %w", err)
 		}
 
@@ -35,10 +35,6 @@ func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageIn
 	}
 
 	return nil
-}
-
-func (e *employee) processVerificationCode(ctx context.Context, chatID int64, code string) error {
-	return errors.New("not implemented")
 }
 
 func (e *employee) processAction(
