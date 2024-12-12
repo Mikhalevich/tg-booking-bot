@@ -24,7 +24,7 @@ func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) er
 
 	var (
 		verificationCode      string
-		editFirstNameActionID int
+		editFirstNameActionID action.ActionID
 	)
 
 	if err := e.repository.Transaction(

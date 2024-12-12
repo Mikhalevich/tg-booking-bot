@@ -18,7 +18,7 @@ func (e *employee) actionCodeVerification(
 	code string,
 ) error {
 	var (
-		editFirstNameActionID int
+		editFirstNameActionID action.ActionID
 		verifiedEmployee      *port.Employee
 		err                   error
 	)

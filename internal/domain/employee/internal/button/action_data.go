@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"fmt"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
 type ActionType int
@@ -14,7 +16,7 @@ const (
 )
 
 type ActionData struct {
-	ID   int
+	ID   action.ActionID
 	Type ActionType
 }
 

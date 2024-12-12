@@ -4,8 +4,18 @@ import (
 	"time"
 )
 
+type ActionID int
+
+func (a ActionID) Int() int {
+	return int(a)
+}
+
+func ActionIDFromInt(id int) ActionID {
+	return ActionID(id)
+}
+
 type ActionInfo struct {
-	ActionID   int
+	ActionID   ActionID
 	EmployeeID int
 	Action     Action
 	Payload    []byte

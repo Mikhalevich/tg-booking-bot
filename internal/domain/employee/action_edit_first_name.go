@@ -21,7 +21,7 @@ func (e *employee) actionEditFirstName(
 		return fmt.Errorf("convert payload to employee_id: %w", err)
 	}
 
-	var actionID int
+	var actionID action.ActionID
 
 	if err := e.repository.Transaction(
 		ctx,

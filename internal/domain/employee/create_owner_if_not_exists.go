@@ -19,7 +19,7 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 		return nil
 	}
 
-	var actionID int
+	var actionID action.ActionID
 
 	if err := e.repository.Transaction(
 		ctx,

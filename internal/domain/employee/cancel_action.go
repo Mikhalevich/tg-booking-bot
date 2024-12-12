@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
-func (e *employee) cancelAction(ctx context.Context, actionID int, msgInfo port.MessageInfo) error {
+func (e *employee) cancelAction(ctx context.Context, actionID action.ActionID, msgInfo port.MessageInfo) error {
 	if err := e.repository.CancelAction(ctx, actionID, time.Now()); err != nil {
 		if !e.repository.IsNotUpdatedError(err) {
 			return fmt.Errorf("cancel action: %w", err)
