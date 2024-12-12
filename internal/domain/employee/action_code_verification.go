@@ -11,7 +11,12 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
-func (e *employee) actionCodeVerification(ctx context.Context, chatID int64, msgID int, code string) error {
+func (e *employee) actionCodeVerification(
+	ctx context.Context,
+	chatID port.ChatID,
+	msgID port.MessageID,
+	code string,
+) error {
 	var (
 		editFirstNameActionID int
 		verifiedEmployee      *port.Employee

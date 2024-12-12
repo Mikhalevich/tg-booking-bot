@@ -10,7 +10,7 @@ type Button struct {
 }
 
 type MessageSender interface {
-	ReplyText(ctx context.Context, chatID int64, replyToMsgID int, text string, buttons ...Button)
-	ReplyTextMarkdown(ctx context.Context, chatID int64, replyToMsgID int, text string)
+	ReplyText(ctx context.Context, chatID ChatID, replyToMsgID MessageID, text string, buttons ...Button)
+	ReplyTextMarkdown(ctx context.Context, chatID ChatID, replyToMsgID MessageID, text string)
 	EscapeMarkdown(s string) string
 }

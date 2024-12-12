@@ -11,7 +11,7 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
-func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID int64) (*port.Employee, error) {
+func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID port.ChatID) (*port.Employee, error) {
 	query, args, err := sqlx.Named(
 		`
 			UPDATE employee SET
@@ -22,7 +22,7 @@ func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID int
 				state = :state_verification_required
 			RETURNING *
 		`, map[string]any{
-			"chat_id":                     chatID,
+			"chat_id":                     chatID.Int64(),
 			"verification_code":           code,
 			"state_registered":            port.EmployeeStateRegistered.String(),
 			"state_verification_required": port.EmployeeStateVerificationRequired.String(),

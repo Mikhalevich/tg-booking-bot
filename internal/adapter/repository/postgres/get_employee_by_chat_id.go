@@ -11,7 +11,7 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
-func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.Employee, error) {
+func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID port.ChatID) (port.Employee, error) {
 	var emp employee
 	if err := sqlx.GetContext(
 		ctx,
@@ -31,7 +31,7 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.
 			employee INNER JOIN role on employee.role_id = role.id
 		WHERE
 			employee.chat_id = $1
-	`, chatID); err != nil {
+	`, chatID.Int64()); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return port.Employee{}, errNotFound
 		}

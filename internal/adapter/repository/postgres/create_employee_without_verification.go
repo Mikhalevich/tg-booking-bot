@@ -10,7 +10,11 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (p *Postgres) CreateEmployeeWithoutVerification(ctx context.Context, r role.Role, chatID int64) (int, error) {
+func (p *Postgres) CreateEmployeeWithoutVerification(
+	ctx context.Context,
+	r role.Role,
+	chatID port.ChatID,
+) (int, error) {
 	roleID, err := roleIDByName(ctx, r, p.db)
 	if err != nil {
 		return 0, fmt.Errorf("get role by name: %w", err)
@@ -30,7 +34,7 @@ func (p *Postgres) CreateEmployeeWithoutVerification(ctx context.Context, r role
 			`, map[string]any{
 			"role_id": roleID,
 			"state":   port.EmployeeStateRegistered,
-			"chat_id": chatID,
+			"chat_id": chatID.Int64(),
 		})
 
 	if err != nil {

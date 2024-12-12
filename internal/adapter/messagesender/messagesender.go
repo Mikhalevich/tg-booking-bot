@@ -24,15 +24,15 @@ func New(bot *bot.Bot) *messageSender {
 
 func (m *messageSender) ReplyText(
 	ctx context.Context,
-	chatID int64,
-	replyToMsgID int,
+	chatID port.ChatID,
+	replyToMsgID port.MessageID,
 	text string,
 	buttons ...port.Button,
 ) {
 	if _, err := m.bot.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatID,
+		ChatID: chatID.Int64(),
 		ReplyParameters: &models.ReplyParameters{
-			MessageID: replyToMsgID,
+			MessageID: replyToMsgID.Int(),
 		},
 		Text:        text,
 		ReplyMarkup: makeButtonsMarkup(buttons...),
@@ -64,11 +64,16 @@ func makeButtonsMarkup(buttons ...port.Button) models.ReplyMarkup {
 	}
 }
 
-func (m *messageSender) ReplyTextMarkdown(ctx context.Context, chatID int64, replyToMsgID int, text string) {
+func (m *messageSender) ReplyTextMarkdown(
+	ctx context.Context,
+	chatID port.ChatID,
+	replyToMsgID port.MessageID,
+	text string,
+) {
 	if _, err := m.bot.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatID,
+		ChatID: chatID.Int64(),
 		ReplyParameters: &models.ReplyParameters{
-			MessageID: replyToMsgID,
+			MessageID: replyToMsgID.Int(),
 		},
 		ParseMode: models.ParseModeMarkdown,
 		Text:      text,

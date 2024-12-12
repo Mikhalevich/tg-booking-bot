@@ -9,10 +9,11 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/transaction"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error) {
+func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID port.ChatID) (int, error) {
 	var ownerID int
 
 	if err := transaction.Transaction(ctx, p.db, true, func(ctx context.Context, tx sqlx.ExtContext) error {

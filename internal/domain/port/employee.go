@@ -37,15 +37,15 @@ type EmployeeRepository interface {
 	IsNotFoundError(err error) bool
 	IsNotUpdatedError(err error) bool
 	IsAlreadyExistsError(err error) bool
-	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error)
+	CreateOwnerIfNotExists(ctx context.Context, chatID ChatID) (int, error)
 	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
 	UpdateFirstName(ctx context.Context, id int, name string, updatedAt time.Time) error
 	UpdateLastName(ctx context.Context, id int, name string, updatedAt time.Time) error
 	GetAllEmployee(ctx context.Context) ([]Employee, error)
-	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
+	GetEmployeeByChatID(ctx context.Context, chatID ChatID) (Employee, error)
 	AddAction(ctx context.Context, info *action.ActionInfo) (int, error)
 	GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
-	CodeVerification(ctx context.Context, code string, chatID int64) (*Employee, error)
+	CodeVerification(ctx context.Context, code string, chatID ChatID) (*Employee, error)
 	CompleteAction(ctx context.Context, id int, completedAt time.Time) error
 	CancelAction(ctx context.Context, id int, completedAt time.Time) error
 }

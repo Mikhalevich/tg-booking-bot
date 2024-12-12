@@ -94,7 +94,7 @@ func (r *Router) wrapHandler(pattern string, h port.Handler) bot.HandlerFunc {
 			if _, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: msgInfo.ChatID,
 				ReplyParameters: &models.ReplyParameters{
-					MessageID: msgInfo.MessageID,
+					MessageID: msgInfo.MessageID.Int(),
 				},
 				Text: "internal error",
 			}); err != nil {
@@ -115,8 +115,8 @@ func (r *Router) applyMiddleware(h port.Handler) port.Handler {
 func makeMsgInfoFromUpdate(u *models.Update) port.MessageInfo {
 	if u.Message != nil {
 		return port.MessageInfo{
-			MessageID: u.Message.ID,
-			ChatID:    u.Message.Chat.ID,
+			MessageID: port.MessageIDFromInt(u.Message.ID),
+			ChatID:    port.ChatIDFromInt(u.Message.Chat.ID),
 			Text:      u.Message.Text,
 		}
 	}
@@ -124,16 +124,16 @@ func makeMsgInfoFromUpdate(u *models.Update) port.MessageInfo {
 	if u.CallbackQuery != nil {
 		if u.CallbackQuery.Message.Message != nil {
 			return port.MessageInfo{
-				MessageID: u.CallbackQuery.Message.Message.ID,
-				ChatID:    u.CallbackQuery.Message.Message.Chat.ID,
+				MessageID: port.MessageIDFromInt(u.CallbackQuery.Message.Message.ID),
+				ChatID:    port.ChatIDFromInt(u.CallbackQuery.Message.Message.Chat.ID),
 				Data:      u.CallbackQuery.Data,
 			}
 		}
 
 		if u.CallbackQuery.Message.InaccessibleMessage != nil {
 			return port.MessageInfo{
-				MessageID: u.CallbackQuery.Message.InaccessibleMessage.MessageID,
-				ChatID:    u.CallbackQuery.Message.InaccessibleMessage.Chat.ID,
+				MessageID: port.MessageIDFromInt(u.CallbackQuery.Message.InaccessibleMessage.MessageID),
+				ChatID:    port.ChatIDFromInt(u.CallbackQuery.Message.InaccessibleMessage.Chat.ID),
 				Data:      u.CallbackQuery.Data,
 			}
 		}
