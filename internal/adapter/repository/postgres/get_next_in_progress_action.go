@@ -8,6 +8,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
@@ -18,7 +19,10 @@ type actionInfo struct {
 	State    action.State  `db:"state"`
 }
 
-func (p *Postgres) GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error) {
+func (p *Postgres) GetNextInProgressAction(
+	ctx context.Context,
+	employeeID port.EmployeeID,
+) (action.ActionInfo, error) {
 	query, args, err := sqlx.Named(`
 		SELECT
 			id,
@@ -33,7 +37,7 @@ func (p *Postgres) GetNextInProgressAction(ctx context.Context, employeeID int) 
 		ORDER BY created_at
 		LIMIT 1
 	`, map[string]any{
-		"employee_id":       employeeID,
+		"employee_id":       employeeID.Int(),
 		"state_in_progress": action.StateInProgress,
 	})
 
@@ -52,7 +56,7 @@ func (p *Postgres) GetNextInProgressAction(ctx context.Context, employeeID int) 
 
 	return action.ActionInfo{
 		ActionID:   action.ActionIDFromInt(info.ActionID),
-		EmployeeID: employeeID,
+		EmployeeID: employeeID.Int(),
 		Action:     info.Action,
 		Payload:    info.Payload,
 		State:      info.State,

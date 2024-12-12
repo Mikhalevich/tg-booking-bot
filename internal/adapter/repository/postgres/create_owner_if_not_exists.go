@@ -13,8 +13,8 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID port.ChatID) (int, error) {
-	var ownerID int
+func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID port.ChatID) (port.EmployeeID, error) {
+	var ownerID port.EmployeeID
 
 	if err := transaction.Transaction(ctx, p.db, true, func(ctx context.Context, tx sqlx.ExtContext) error {
 		if _, err := tx.ExecContext(ctx, `LOCK TABLE employee IN SHARE ROW EXCLUSIVE MODE`); err != nil {
@@ -30,12 +30,10 @@ func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID port.ChatI
 			return errAlreadyExists
 		}
 
-		id, err := p.CreateEmployeeWithoutVerification(ctx, role.Owner, chatID)
+		ownerID, err = p.CreateEmployeeWithoutVerification(ctx, role.Owner, chatID)
 		if err != nil {
 			return fmt.Errorf("create employee without verifiation")
 		}
-
-		ownerID = id
 
 		return nil
 	},

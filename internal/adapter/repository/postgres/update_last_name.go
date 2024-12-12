@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
 func (p *Postgres) UpdateLastName(
 	ctx context.Context,
-	employeeID int,
+	employeeID port.EmployeeID,
 	name string,
 	updatedAt time.Time,
 ) error {

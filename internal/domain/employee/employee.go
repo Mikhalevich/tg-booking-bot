@@ -25,7 +25,7 @@ func New(
 
 func (e *employee) nextNotCompletedAction(
 	ctx context.Context,
-	employeeID int,
+	employeeID port.EmployeeID,
 ) (action.ActionInfo, bool, error) {
 	info, err := e.repository.GetNextInProgressAction(ctx, employeeID)
 	if err != nil {

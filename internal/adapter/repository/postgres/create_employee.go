@@ -12,8 +12,11 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-// CreateEmployee returns id of created employee.
-func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error) {
+func (p *Postgres) CreateEmployee(
+	ctx context.Context,
+	r role.Role,
+	verificationCode string,
+) (port.EmployeeID, error) {
 	var roleID int
 	if err := sqlx.GetContext(
 		ctx,
@@ -57,5 +60,5 @@ func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verification
 		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
-	return employeeID, nil
+	return port.EmployeeIDFromInt(employeeID), nil
 }

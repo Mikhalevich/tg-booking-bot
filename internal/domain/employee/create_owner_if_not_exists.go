@@ -35,7 +35,7 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.Message
 			}
 
 			id, err := tx.AddAction(ctx, &action.ActionInfo{
-				EmployeeID: createdOwnerID,
+				EmployeeID: createdOwnerID.Int(),
 				Action:     action.EditEmployeeFirstName,
 				Payload:    actionPayload,
 				CreatedAt:  time.Now(),

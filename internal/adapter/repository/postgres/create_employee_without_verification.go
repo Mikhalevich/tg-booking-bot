@@ -14,7 +14,7 @@ func (p *Postgres) CreateEmployeeWithoutVerification(
 	ctx context.Context,
 	r role.Role,
 	chatID port.ChatID,
-) (int, error) {
+) (port.EmployeeID, error) {
 	roleID, err := roleIDByName(ctx, r, p.db)
 	if err != nil {
 		return 0, fmt.Errorf("get role by name: %w", err)
@@ -46,5 +46,5 @@ func (p *Postgres) CreateEmployeeWithoutVerification(
 		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
-	return employeeID, nil
+	return port.EmployeeIDFromInt(employeeID), nil
 }

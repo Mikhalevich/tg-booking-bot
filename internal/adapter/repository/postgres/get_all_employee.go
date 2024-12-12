@@ -51,11 +51,11 @@ func (p *Postgres) GetAllEmployee(ctx context.Context) ([]port.Employee, error) 
 
 func convertToEmployee(empl employee) port.Employee {
 	return port.Employee{
-		ID:               empl.ID,
+		ID:               port.EmployeeIDFromInt(empl.ID),
 		FirstName:        empl.FirstName,
 		LastName:         empl.LastName,
 		Role:             empl.Role,
-		ChatID:           empl.ChatID.Int64,
+		ChatID:           port.ChatIDFromInt(empl.ChatID.Int64),
 		State:            empl.State,
 		VerificationCode: empl.VerificationCode.String,
 		CreatedAt:        empl.CreatedAt,

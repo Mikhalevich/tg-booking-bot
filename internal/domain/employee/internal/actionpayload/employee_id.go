@@ -3,13 +3,15 @@ package actionpayload
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
 type EmployeeID struct {
-	ID int `json:"employee_id"`
+	ID port.EmployeeID `json:"employee_id"`
 }
 
-func BytesFromEmployeeID(id int) ([]byte, error) {
+func BytesFromEmployeeID(id port.EmployeeID) ([]byte, error) {
 	b, err := json.Marshal(EmployeeID{
 		ID: id,
 	})
