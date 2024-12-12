@@ -44,7 +44,7 @@ func (e *employee) CreateEmployee(ctx context.Context, info msginfo.Info) error 
 			}
 
 			editFirstNameActionID, err = tx.AddAction(ctx, &action.ActionInfo{
-				EmployeeID: currentEmployee.ID.Int(),
+				EmployeeID: currentEmployee.ID,
 				Action:     action.EditEmployeeFirstName,
 				Payload:    actionPayload,
 				CreatedAt:  time.Now(),

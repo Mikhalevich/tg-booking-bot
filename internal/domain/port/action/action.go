@@ -2,6 +2,8 @@ package action
 
 import (
 	"time"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
 type ActionID int
@@ -16,7 +18,7 @@ func ActionIDFromInt(id int) ActionID {
 
 type ActionInfo struct {
 	ActionID   ActionID
-	EmployeeID int
+	EmployeeID empl.EmployeeID
 	Action     Action
 	Payload    []byte
 	State      State

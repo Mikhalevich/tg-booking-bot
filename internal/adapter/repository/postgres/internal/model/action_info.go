@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
 type ActionInfo struct {
@@ -15,7 +16,7 @@ type ActionInfo struct {
 func ToPortActionInfo(a ActionInfo) action.ActionInfo {
 	return action.ActionInfo{
 		ActionID:   action.ActionIDFromInt(a.ActionID),
-		EmployeeID: a.EmployeeID,
+		EmployeeID: empl.EmployeeIDFromInt(a.EmployeeID),
 		Action:     a.Action,
 		Payload:    a.Payload,
 		State:      a.State,

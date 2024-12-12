@@ -39,7 +39,7 @@ func (e *employee) actionCodeVerification(
 			}
 
 			editFirstNameActionID, err = tx.AddAction(ctx, &action.ActionInfo{
-				EmployeeID: verifiedEmployee.ID.Int(),
+				EmployeeID: verifiedEmployee.ID,
 				Action:     action.EditEmployeeFirstName,
 				Payload:    editFirstNameActionPayload,
 				CreatedAt:  time.Now(),
