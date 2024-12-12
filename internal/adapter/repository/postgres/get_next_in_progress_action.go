@@ -16,7 +16,7 @@ import (
 func (p *Postgres) GetNextInProgressAction(
 	ctx context.Context,
 	employeeID empl.EmployeeID,
-) (action.ActionInfo, error) {
+) (*action.ActionInfo, error) {
 	query, args, err := sqlx.Named(`
 		SELECT
 			id,
@@ -37,16 +37,16 @@ func (p *Postgres) GetNextInProgressAction(
 	})
 
 	if err != nil {
-		return action.ActionInfo{}, fmt.Errorf("named: %w", err)
+		return nil, fmt.Errorf("named: %w", err)
 	}
 
 	var info model.ActionInfo
 	if err := sqlx.GetContext(ctx, p.db, &info, p.db.Rebind(query), args...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return action.ActionInfo{}, errNotFound
+			return nil, errNotFound
 		}
 
-		return action.ActionInfo{}, fmt.Errorf("select context: %w", err)
+		return nil, fmt.Errorf("select context: %w", err)
 	}
 
 	return model.ToPortActionInfo(info), nil

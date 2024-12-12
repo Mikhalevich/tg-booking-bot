@@ -17,7 +17,7 @@ func (e *employee) EmployeeMiddleware(next msginfo.Handler) msginfo.Handler {
 				return fmt.Errorf("get employee by chat_id: %w", err)
 			}
 		} else {
-			ctx = ctxdata.WithEmployee(ctx, empl)
+			ctx = ctxdata.WithEmployee(ctx, *empl)
 		}
 
 		return next(ctx, info)

@@ -21,9 +21,9 @@ type EmployeeRepository interface {
 	UpdateFirstName(ctx context.Context, id empl.EmployeeID, name string, updatedAt time.Time) error
 	UpdateLastName(ctx context.Context, id empl.EmployeeID, name string, updatedAt time.Time) error
 	GetAllEmployee(ctx context.Context) ([]empl.Employee, error)
-	GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatID) (empl.Employee, error)
+	GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatID) (*empl.Employee, error)
 	AddAction(ctx context.Context, info *action.ActionInfo) (action.ActionID, error)
-	GetNextInProgressAction(ctx context.Context, employeeID empl.EmployeeID) (action.ActionInfo, error)
+	GetNextInProgressAction(ctx context.Context, employeeID empl.EmployeeID) (*action.ActionInfo, error)
 	CodeVerification(ctx context.Context, code string, chatID msginfo.ChatID) (*empl.Employee, error)
 	CompleteAction(ctx context.Context, id action.ActionID, completedAt time.Time) error
 	CancelAction(ctx context.Context, id action.ActionID, completedAt time.Time) error

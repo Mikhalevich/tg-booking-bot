@@ -13,8 +13,8 @@ type ActionInfo struct {
 	State      action.State  `db:"state"`
 }
 
-func ToPortActionInfo(a ActionInfo) action.ActionInfo {
-	return action.ActionInfo{
+func ToPortActionInfo(a ActionInfo) *action.ActionInfo {
+	return &action.ActionInfo{
 		ActionID:   action.ActionIDFromInt(a.ActionID),
 		EmployeeID: empl.EmployeeIDFromInt(a.EmployeeID),
 		Action:     a.Action,

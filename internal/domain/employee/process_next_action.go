@@ -30,7 +30,7 @@ func (e *employee) ProcessNextAction(ctx context.Context, msgInfo msginfo.Info) 
 		return nil
 	}
 
-	if err := e.processAction(ctx, msgInfo, actionInfo); err != nil {
+	if err := e.processAction(ctx, msgInfo, *actionInfo); err != nil {
 		return fmt.Errorf("process next action: %w", err)
 	}
 

@@ -13,7 +13,7 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatID) (empl.Employee, error) {
+func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatID) (*empl.Employee, error) {
 	var emp model.Employee
 	if err := sqlx.GetContext(
 		ctx,
@@ -35,10 +35,10 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatI
 			employee.chat_id = $1
 	`, chatID.Int64()); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return empl.Employee{}, errNotFound
+			return nil, errNotFound
 		}
 
-		return empl.Employee{}, fmt.Errorf("select employee: %w", err)
+		return nil, fmt.Errorf("select employee: %w", err)
 	}
 
 	return model.ToPortEmployee(emp), nil

@@ -21,8 +21,8 @@ type Employee struct {
 	UpdatedAt        time.Time          `db:"updated_at"`
 }
 
-func ToPortEmployee(e Employee) empl.Employee {
-	return empl.Employee{
+func ToPortEmployee(e Employee) *empl.Employee {
+	return &empl.Employee{
 		ID:               empl.EmployeeIDFromInt(e.ID),
 		FirstName:        e.FirstName,
 		LastName:         e.LastName,
@@ -42,7 +42,7 @@ func ToPortEmployees(empls []Employee) []empl.Employee {
 
 	portEmpls := make([]empl.Employee, 0, len(empls))
 	for _, e := range empls {
-		portEmpls = append(portEmpls, ToPortEmployee(e))
+		portEmpls = append(portEmpls, *ToPortEmployee(e))
 	}
 
 	return portEmpls

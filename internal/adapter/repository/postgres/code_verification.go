@@ -42,7 +42,5 @@ func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID msg
 		return nil, fmt.Errorf("get employee: %w", err)
 	}
 
-	portEmpl := model.ToPortEmployee(empl)
-
-	return &portEmpl, nil
+	return model.ToPortEmployee(empl), nil
 }

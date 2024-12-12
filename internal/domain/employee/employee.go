@@ -27,14 +27,14 @@ func New(
 func (e *employee) nextNotCompletedAction(
 	ctx context.Context,
 	employeeID empl.EmployeeID,
-) (action.ActionInfo, bool, error) {
+) (*action.ActionInfo, bool, error) {
 	info, err := e.repository.GetNextInProgressAction(ctx, employeeID)
 	if err != nil {
 		if e.repository.IsNotFoundError(err) {
-			return action.ActionInfo{}, false, nil
+			return nil, false, nil
 		}
 
-		return action.ActionInfo{}, false, fmt.Errorf("get next action from repo: %w", err)
+		return nil, false, fmt.Errorf("get next action from repo: %w", err)
 	}
 
 	return info, true, nil
