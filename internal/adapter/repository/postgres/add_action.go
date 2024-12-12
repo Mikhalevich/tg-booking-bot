@@ -9,7 +9,7 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
 )
 
-func (p *Postgres) AddAction(ctx context.Context, info *action.ActionInfo) (int, error) {
+func (p *Postgres) AddAction(ctx context.Context, info *action.ActionInfo) (action.ActionID, error) {
 	return addAction(ctx, p.db, info)
 }
 
@@ -17,7 +17,7 @@ func addAction(
 	ctx context.Context,
 	e sqlx.ExtContext,
 	info *action.ActionInfo,
-) (int, error) {
+) (action.ActionID, error) {
 	query, args, err := sqlx.Named(
 		`
 			INSERT INTO actions(
@@ -52,5 +52,5 @@ func addAction(
 		return 0, fmt.Errorf("insert action: %w", err)
 	}
 
-	return actionID, nil
+	return action.ActionIDFromInt(actionID), nil
 }

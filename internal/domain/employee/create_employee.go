@@ -13,10 +13,11 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) error {
+func (e *employee) CreateEmployee(ctx context.Context, info msginfo.Info) error {
 	currentEmployee, ok := ctxdata.Employee(ctx)
 	if !ok {
 		return errors.New("unable to get current employee")
@@ -24,7 +25,7 @@ func (e *employee) CreateEmployee(ctx context.Context, info port.MessageInfo) er
 
 	var (
 		verificationCode      string
-		editFirstNameActionID int
+		editFirstNameActionID action.ActionID
 	)
 
 	if err := e.repository.Transaction(

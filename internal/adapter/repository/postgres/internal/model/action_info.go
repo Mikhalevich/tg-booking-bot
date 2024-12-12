@@ -1,0 +1,24 @@
+package model
+
+import (
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+)
+
+type ActionInfo struct {
+	ActionID   int           `db:"id"`
+	EmployeeID int           `db:"employee_id"`
+	Action     action.Action `db:"action"`
+	Payload    []byte        `db:"payload"`
+	State      action.State  `db:"state"`
+}
+
+func ToPortActionInfo(a ActionInfo) *action.ActionInfo {
+	return &action.ActionInfo{
+		ActionID:   action.ActionIDFromInt(a.ActionID),
+		EmployeeID: empl.EmployeeIDFromInt(a.EmployeeID),
+		Action:     a.Action,
+		Payload:    a.Payload,
+		State:      a.State,
+	}
+}

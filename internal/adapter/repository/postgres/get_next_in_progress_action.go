@@ -8,20 +8,19 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/model"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
-type actionInfo struct {
-	ActionID int           `db:"id"`
-	Action   action.Action `db:"action"`
-	Payload  []byte        `db:"payload"`
-	State    action.State  `db:"state"`
-}
-
-func (p *Postgres) GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error) {
+func (p *Postgres) GetNextInProgressAction(
+	ctx context.Context,
+	employeeID empl.EmployeeID,
+) (*action.ActionInfo, error) {
 	query, args, err := sqlx.Named(`
 		SELECT
 			id,
+			employee_id,
 			action,
 			payload,
 			state
@@ -33,28 +32,22 @@ func (p *Postgres) GetNextInProgressAction(ctx context.Context, employeeID int) 
 		ORDER BY created_at
 		LIMIT 1
 	`, map[string]any{
-		"employee_id":       employeeID,
+		"employee_id":       employeeID.Int(),
 		"state_in_progress": action.StateInProgress,
 	})
 
 	if err != nil {
-		return action.ActionInfo{}, fmt.Errorf("named: %w", err)
+		return nil, fmt.Errorf("named: %w", err)
 	}
 
-	var info actionInfo
+	var info model.ActionInfo
 	if err := sqlx.GetContext(ctx, p.db, &info, p.db.Rebind(query), args...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return action.ActionInfo{}, errNotFound
+			return nil, errNotFound
 		}
 
-		return action.ActionInfo{}, fmt.Errorf("select context: %w", err)
+		return nil, fmt.Errorf("select context: %w", err)
 	}
 
-	return action.ActionInfo{
-		ActionID:   info.ActionID,
-		EmployeeID: employeeID,
-		Action:     info.Action,
-		Payload:    info.Payload,
-		State:      info.State,
-	}, nil
+	return model.ToPortActionInfo(info), nil
 }

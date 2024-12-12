@@ -2,11 +2,23 @@ package action
 
 import (
 	"time"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
+type ActionID int
+
+func (a ActionID) Int() int {
+	return int(a)
+}
+
+func ActionIDFromInt(id int) ActionID {
+	return ActionID(id)
+}
+
 type ActionInfo struct {
-	ActionID   int
-	EmployeeID int
+	ActionID   ActionID
+	EmployeeID empl.EmployeeID
 	Action     Action
 	Payload    []byte
 	State      State

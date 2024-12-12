@@ -5,31 +5,10 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
-
-type EmployeeState string
-
-const (
-	EmployeeStateVerificationRequired EmployeeState = "verification_required"
-	EmployeeStateRegistered           EmployeeState = "registered"
-)
-
-func (e EmployeeState) String() string {
-	return string(e)
-}
-
-type Employee struct {
-	ID               int
-	FirstName        string
-	LastName         string
-	Role             role.Role
-	ChatID           int64
-	State            EmployeeState
-	VerificationCode string
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
-}
 
 //nolint:interfacebloat
 type EmployeeRepository interface {
@@ -37,15 +16,15 @@ type EmployeeRepository interface {
 	IsNotFoundError(err error) bool
 	IsNotUpdatedError(err error) bool
 	IsAlreadyExistsError(err error) bool
-	CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error)
-	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error)
-	UpdateFirstName(ctx context.Context, id int, name string, updatedAt time.Time) error
-	UpdateLastName(ctx context.Context, id int, name string, updatedAt time.Time) error
-	GetAllEmployee(ctx context.Context) ([]Employee, error)
-	GetEmployeeByChatID(ctx context.Context, chatID int64) (Employee, error)
-	AddAction(ctx context.Context, info *action.ActionInfo) (int, error)
-	GetNextInProgressAction(ctx context.Context, employeeID int) (action.ActionInfo, error)
-	CodeVerification(ctx context.Context, code string, chatID int64) (*Employee, error)
-	CompleteAction(ctx context.Context, id int, completedAt time.Time) error
-	CancelAction(ctx context.Context, id int, completedAt time.Time) error
+	CreateOwnerIfNotExists(ctx context.Context, chatID msginfo.ChatID) (empl.EmployeeID, error)
+	CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (empl.EmployeeID, error)
+	UpdateFirstName(ctx context.Context, id empl.EmployeeID, name string, updatedAt time.Time) error
+	UpdateLastName(ctx context.Context, id empl.EmployeeID, name string, updatedAt time.Time) error
+	GetAllEmployee(ctx context.Context) ([]empl.Employee, error)
+	GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatID) (*empl.Employee, error)
+	AddAction(ctx context.Context, info *action.ActionInfo) (action.ActionID, error)
+	GetNextInProgressAction(ctx context.Context, employeeID empl.EmployeeID) (*action.ActionInfo, error)
+	CodeVerification(ctx context.Context, code string, chatID msginfo.ChatID) (*empl.Employee, error)
+	CompleteAction(ctx context.Context, id action.ActionID, completedAt time.Time) error
+	CancelAction(ctx context.Context, id action.ActionID, completedAt time.Time) error
 }

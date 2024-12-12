@@ -7,6 +7,7 @@ import (
 	"github.com/go-telegram/bot/models"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 )
 
@@ -24,15 +25,15 @@ func New(bot *bot.Bot) *messageSender {
 
 func (m *messageSender) ReplyText(
 	ctx context.Context,
-	chatID int64,
-	replyToMsgID int,
+	chatID msginfo.ChatID,
+	replyToMsgID msginfo.MessageID,
 	text string,
 	buttons ...port.Button,
 ) {
 	if _, err := m.bot.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatID,
+		ChatID: chatID.Int64(),
 		ReplyParameters: &models.ReplyParameters{
-			MessageID: replyToMsgID,
+			MessageID: replyToMsgID.Int(),
 		},
 		Text:        text,
 		ReplyMarkup: makeButtonsMarkup(buttons...),
@@ -64,11 +65,16 @@ func makeButtonsMarkup(buttons ...port.Button) models.ReplyMarkup {
 	}
 }
 
-func (m *messageSender) ReplyTextMarkdown(ctx context.Context, chatID int64, replyToMsgID int, text string) {
+func (m *messageSender) ReplyTextMarkdown(
+	ctx context.Context,
+	chatID msginfo.ChatID,
+	replyToMsgID msginfo.MessageID,
+	text string,
+) {
 	if _, err := m.bot.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatID,
+		ChatID: chatID.Int64(),
 		ReplyParameters: &models.ReplyParameters{
-			MessageID: replyToMsgID,
+			MessageID: replyToMsgID.Int(),
 		},
 		ParseMode: models.ParseModeMarkdown,
 		Text:      text,

@@ -8,12 +8,15 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-// CreateEmployee returns id of created employee.
-func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verificationCode string) (int, error) {
+func (p *Postgres) CreateEmployee(
+	ctx context.Context,
+	r role.Role,
+	verificationCode string,
+) (empl.EmployeeID, error) {
 	var roleID int
 	if err := sqlx.GetContext(
 		ctx,
@@ -44,7 +47,7 @@ func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verification
 		RETURNING id
 		`, map[string]any{
 			"role_id":           roleID,
-			"state":             port.EmployeeStateVerificationRequired,
+			"state":             empl.EmployeeStateVerificationRequired,
 			"verification_code": verificationCode,
 		})
 
@@ -57,5 +60,5 @@ func (p *Postgres) CreateEmployee(ctx context.Context, r role.Role, verification
 		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
-	return employeeID, nil
+	return empl.EmployeeIDFromInt(employeeID), nil
 }

@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
 func (p *Postgres) UpdateFirstName(
 	ctx context.Context,
-	employeeID int,
+	employeeID empl.EmployeeID,
 	name string,
 	updatedAt time.Time,
 ) error {
@@ -25,7 +27,7 @@ func (p *Postgres) UpdateFirstName(
 		`,
 		map[string]any{
 			"first_name":  name,
-			"employee_id": employeeID,
+			"employee_id": employeeID.Int(),
 			"updated_at":  updatedAt,
 		},
 	)

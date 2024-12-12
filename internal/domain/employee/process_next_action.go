@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageInfo) error {
+func (e *employee) ProcessNextAction(ctx context.Context, msgInfo msginfo.Info) error {
 	empl, ok := ctxdata.Employee(ctx)
 	if !ok {
 		if err := e.actionCodeVerification(ctx, msgInfo.ChatID, msgInfo.MessageID, msgInfo.Text); err != nil {
@@ -30,7 +30,7 @@ func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageIn
 		return nil
 	}
 
-	if err := e.processAction(ctx, msgInfo, actionInfo); err != nil {
+	if err := e.processAction(ctx, msgInfo, *actionInfo); err != nil {
 		return fmt.Errorf("process next action: %w", err)
 	}
 
@@ -39,7 +39,7 @@ func (e *employee) ProcessNextAction(ctx context.Context, msgInfo port.MessageIn
 
 func (e *employee) processAction(
 	ctx context.Context,
-	msgInfo port.MessageInfo,
+	msgInfo msginfo.Info,
 	actionInfo action.ActionInfo,
 ) error {
 	var err error

@@ -8,11 +8,13 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/model"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.Employee, error) {
-	var emp employee
+func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatID) (*empl.Employee, error) {
+	var emp model.Employee
 	if err := sqlx.GetContext(
 		ctx,
 		p.db,
@@ -31,17 +33,13 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID int64) (port.
 			employee INNER JOIN role on employee.role_id = role.id
 		WHERE
 			employee.chat_id = $1
-	`, chatID); err != nil {
+	`, chatID.Int64()); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return port.Employee{}, errNotFound
+			return nil, errNotFound
 		}
 
-		return port.Employee{}, fmt.Errorf("select employee: %w", err)
+		return nil, fmt.Errorf("select employee: %w", err)
 	}
 
-	return convertToEmployee(emp), nil
-}
-
-func (p *Postgres) IsEmployeeNotFoundError(err error) bool {
-	return errors.Is(err, sql.ErrNoRows)
+	return model.ToPortEmployee(emp), nil
 }

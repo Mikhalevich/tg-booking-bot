@@ -9,11 +9,13 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/transaction"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID int64) (int, error) {
-	var ownerID int
+func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID msginfo.ChatID) (empl.EmployeeID, error) {
+	var ownerID empl.EmployeeID
 
 	if err := transaction.Transaction(ctx, p.db, true, func(ctx context.Context, tx sqlx.ExtContext) error {
 		if _, err := tx.ExecContext(ctx, `LOCK TABLE employee IN SHARE ROW EXCLUSIVE MODE`); err != nil {
@@ -29,12 +31,10 @@ func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID int64) (in
 			return errAlreadyExists
 		}
 
-		id, err := p.CreateEmployeeWithoutVerification(ctx, role.Owner, chatID)
+		ownerID, err = p.CreateEmployeeWithoutVerification(ctx, role.Owner, chatID)
 		if err != nil {
 			return fmt.Errorf("create employee without verifiation")
 		}
-
-		ownerID = id
 
 		return nil
 	},

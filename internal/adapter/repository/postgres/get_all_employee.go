@@ -2,30 +2,16 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
+	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/model"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
-type employee struct {
-	ID               int                `db:"id"`
-	FirstName        string             `db:"first_name"`
-	LastName         string             `db:"last_name"`
-	Role             role.Role          `db:"role_name"`
-	ChatID           sql.NullInt64      `db:"chat_id"`
-	State            port.EmployeeState `db:"state"`
-	VerificationCode sql.NullString     `db:"verification_code"`
-	CreatedAt        time.Time          `db:"created_at"`
-	UpdatedAt        time.Time          `db:"updated_at"`
-}
-
-func (p *Postgres) GetAllEmployee(ctx context.Context) ([]port.Employee, error) {
-	var empls []employee
+func (p *Postgres) GetAllEmployee(ctx context.Context) ([]empl.Employee, error) {
+	var empls []model.Employee
 	if err := sqlx.SelectContext(
 		ctx,
 		p.db,
@@ -46,32 +32,5 @@ func (p *Postgres) GetAllEmployee(ctx context.Context) ([]port.Employee, error) 
 		return nil, fmt.Errorf("select employee: %w", err)
 	}
 
-	return convertToEmployees(empls), nil
-}
-
-func convertToEmployee(empl employee) port.Employee {
-	return port.Employee{
-		ID:               empl.ID,
-		FirstName:        empl.FirstName,
-		LastName:         empl.LastName,
-		Role:             empl.Role,
-		ChatID:           empl.ChatID.Int64,
-		State:            empl.State,
-		VerificationCode: empl.VerificationCode.String,
-		CreatedAt:        empl.CreatedAt,
-		UpdatedAt:        empl.UpdatedAt,
-	}
-}
-
-func convertToEmployees(empls []employee) []port.Employee {
-	if len(empls) == 0 {
-		return nil
-	}
-
-	portEmpls := make([]port.Employee, 0, len(empls))
-	for _, e := range empls {
-		portEmpls = append(portEmpls, convertToEmployee(e))
-	}
-
-	return portEmpls
+	return model.ToPortEmployees(empls), nil
 }

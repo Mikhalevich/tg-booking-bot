@@ -6,6 +6,7 @@ import (
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
 type employee struct {
@@ -25,15 +26,15 @@ func New(
 
 func (e *employee) nextNotCompletedAction(
 	ctx context.Context,
-	employeeID int,
-) (action.ActionInfo, bool, error) {
+	employeeID empl.EmployeeID,
+) (*action.ActionInfo, bool, error) {
 	info, err := e.repository.GetNextInProgressAction(ctx, employeeID)
 	if err != nil {
 		if e.repository.IsNotFoundError(err) {
-			return action.ActionInfo{}, false, nil
+			return nil, false, nil
 		}
 
-		return action.ActionInfo{}, false, fmt.Errorf("get next action from repo: %w", err)
+		return nil, false, fmt.Errorf("get next action from repo: %w", err)
 	}
 
 	return info, true, nil

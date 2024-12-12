@@ -5,9 +5,10 @@ import (
 	"fmt"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (s *schedule) CreateTestScheduleTemplate(ctx context.Context, info port.MessageInfo) error {
+func (s *schedule) CreateTestScheduleTemplate(ctx context.Context, info msginfo.Info) error {
 	if err := s.repository.CreateTestScheduleTemplate(ctx, port.ScheduleTemplate{
 		Name:        "test_schedule_template_name_1",
 		Description: "test_schedule_templaet_description_1",

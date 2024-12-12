@@ -6,11 +6,16 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (p *Postgres) CreateEmployeeWithoutVerification(ctx context.Context, r role.Role, chatID int64) (int, error) {
+func (p *Postgres) CreateEmployeeWithoutVerification(
+	ctx context.Context,
+	r role.Role,
+	chatID msginfo.ChatID,
+) (empl.EmployeeID, error) {
 	roleID, err := roleIDByName(ctx, r, p.db)
 	if err != nil {
 		return 0, fmt.Errorf("get role by name: %w", err)
@@ -29,8 +34,8 @@ func (p *Postgres) CreateEmployeeWithoutVerification(ctx context.Context, r role
 			RETURNING id
 			`, map[string]any{
 			"role_id": roleID,
-			"state":   port.EmployeeStateRegistered,
-			"chat_id": chatID,
+			"state":   empl.EmployeeStateRegistered,
+			"chat_id": chatID.Int64(),
 		})
 
 	if err != nil {
@@ -42,5 +47,5 @@ func (p *Postgres) CreateEmployeeWithoutVerification(ctx context.Context, r role
 		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
-	return employeeID, nil
+	return empl.EmployeeIDFromInt(employeeID), nil
 }

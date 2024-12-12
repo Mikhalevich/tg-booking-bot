@@ -8,10 +8,12 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/model"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID int64) (*port.Employee, error) {
+func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID msginfo.ChatID) (*empl.Employee, error) {
 	query, args, err := sqlx.Named(
 		`
 			UPDATE employee SET
@@ -22,16 +24,16 @@ func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID int
 				state = :state_verification_required
 			RETURNING *
 		`, map[string]any{
-			"chat_id":                     chatID,
+			"chat_id":                     chatID.Int64(),
 			"verification_code":           code,
-			"state_registered":            port.EmployeeStateRegistered.String(),
-			"state_verification_required": port.EmployeeStateVerificationRequired.String(),
+			"state_registered":            empl.EmployeeStateRegistered.String(),
+			"state_verification_required": empl.EmployeeStateVerificationRequired.String(),
 		})
 	if err != nil {
 		return nil, fmt.Errorf("named: %w", err)
 	}
 
-	var empl employee
+	var empl model.Employee
 	if err := sqlx.GetContext(ctx, p.db, &empl, p.db.Rebind(query), args...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errNotFound
@@ -40,7 +42,5 @@ func (p *Postgres) CodeVerification(ctx context.Context, code string, chatID int
 		return nil, fmt.Errorf("get employee: %w", err)
 	}
 
-	portEmpl := convertToEmployee(empl)
-
-	return &portEmpl, nil
+	return model.ToPortEmployee(empl), nil
 }
