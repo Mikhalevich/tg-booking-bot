@@ -8,12 +8,13 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/model"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
 func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatID) (empl.Employee, error) {
-	var emp employee
+	var emp model.Employee
 	if err := sqlx.GetContext(
 		ctx,
 		p.db,
@@ -40,9 +41,5 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatI
 		return empl.Employee{}, fmt.Errorf("select employee: %w", err)
 	}
 
-	return convertToEmployee(emp), nil
-}
-
-func (p *Postgres) IsEmployeeNotFoundError(err error) bool {
-	return errors.Is(err, sql.ErrNoRows)
+	return model.ToPortEmployee(emp), nil
 }

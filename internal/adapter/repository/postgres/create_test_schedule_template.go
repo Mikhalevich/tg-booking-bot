@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/jsonb"
+	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/model"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 )
 
@@ -28,7 +29,7 @@ func (p *Postgres) CreateTestScheduleTemplate(ctx context.Context, tmpl port.Sch
 			:description,
 			:schedule_payload
 		) ON CONFLICT(name) DO NOTHING`,
-		scheduleTemplate{
+		model.ScheduleTemplate{
 			Name:            tmpl.Name,
 			Description:     tmpl.Description,
 			SchedulePayload: payload,
