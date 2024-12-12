@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/app/tgbot/router"
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
 type Employer interface {
-	CreateEmployee(ctx context.Context, msgInfo port.MessageInfo) error
-	CreateOwnerIfNotExists(ctx context.Context, msgInfo port.MessageInfo) error
-	GetAllEmployee(ctx context.Context, msgInfo port.MessageInfo) error
-	ProcessNextAction(ctx context.Context, msgInfo port.MessageInfo) error
-	ProcessCallbackQuery(ctx context.Context, msgInfo port.MessageInfo) error
-	EmployeeMiddleware(next port.Handler) port.Handler
-	RegistrationMiddleware(next port.Handler) port.Handler
-	NotCompletedActionMiddleware(next port.Handler) port.Handler
+	CreateEmployee(ctx context.Context, msgInfo msginfo.Info) error
+	CreateOwnerIfNotExists(ctx context.Context, msgInfo msginfo.Info) error
+	GetAllEmployee(ctx context.Context, msgInfo msginfo.Info) error
+	ProcessNextAction(ctx context.Context, msgInfo msginfo.Info) error
+	ProcessCallbackQuery(ctx context.Context, msgInfo msginfo.Info) error
+	EmployeeMiddleware(next msginfo.Handler) msginfo.Handler
+	RegistrationMiddleware(next msginfo.Handler) msginfo.Handler
+	NotCompletedActionMiddleware(next msginfo.Handler) msginfo.Handler
 }
 
 func EmployeeRoutes(e Employer) RouteRegisterFunc {

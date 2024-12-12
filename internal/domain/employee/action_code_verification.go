@@ -9,17 +9,19 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/button"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
 func (e *employee) actionCodeVerification(
 	ctx context.Context,
-	chatID port.ChatID,
-	msgID port.MessageID,
+	chatID msginfo.ChatID,
+	msgID msginfo.MessageID,
 	code string,
 ) error {
 	var (
 		editFirstNameActionID action.ActionID
-		verifiedEmployee      *port.Employee
+		verifiedEmployee      *empl.Employee
 		err                   error
 	)
 

@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (s *schedule) GetAllTemplates(ctx context.Context, info port.MessageInfo) error {
+func (s *schedule) GetAllTemplates(ctx context.Context, info msginfo.Info) error {
 	tmpls, err := s.repository.GetAllTemplates(ctx)
 	if err != nil {
 		return fmt.Errorf("get all templates: %w", err)

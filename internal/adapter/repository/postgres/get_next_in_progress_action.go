@@ -8,8 +8,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
 type actionInfo struct {
@@ -21,7 +21,7 @@ type actionInfo struct {
 
 func (p *Postgres) GetNextInProgressAction(
 	ctx context.Context,
-	employeeID port.EmployeeID,
+	employeeID empl.EmployeeID,
 ) (action.ActionInfo, error) {
 	query, args, err := sqlx.Named(`
 		SELECT

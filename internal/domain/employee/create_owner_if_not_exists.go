@@ -10,9 +10,10 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/internal/ctxdata"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info port.MessageInfo) error {
+func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info msginfo.Info) error {
 	_, ok := ctxdata.Employee(ctx)
 	if ok {
 		e.sender.ReplyText(ctx, info.ChatID, info.MessageID, "not allowed")

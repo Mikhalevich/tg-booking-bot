@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
-func (e *employee) GetAllEmployee(ctx context.Context, info port.MessageInfo) error {
+func (e *employee) GetAllEmployee(ctx context.Context, info msginfo.Info) error {
 	empls, err := e.repository.GetAllEmployee(ctx)
 	if err != nil {
 		return fmt.Errorf("get all employee: %w", err)
@@ -20,7 +21,7 @@ func (e *employee) GetAllEmployee(ctx context.Context, info port.MessageInfo) er
 	return nil
 }
 
-func (e *employee) formatEmployeeMsg(empls []port.Employee) string {
+func (e *employee) formatEmployeeMsg(empls []empl.Employee) string {
 	if len(empls) == 0 {
 		return "*no employes found*"
 	}

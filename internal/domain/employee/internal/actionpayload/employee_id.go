@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 )
 
 type EmployeeID struct {
-	ID port.EmployeeID `json:"employee_id"`
+	ID empl.EmployeeID `json:"employee_id"`
 }
 
-func BytesFromEmployeeID(id port.EmployeeID) ([]byte, error) {
+func BytesFromEmployeeID(id empl.EmployeeID) ([]byte, error) {
 	b, err := json.Marshal(EmployeeID{
 		ID: id,
 	})

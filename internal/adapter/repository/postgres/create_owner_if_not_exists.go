@@ -9,12 +9,13 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/adapter/repository/postgres/internal/transaction"
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
-func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID port.ChatID) (port.EmployeeID, error) {
-	var ownerID port.EmployeeID
+func (p *Postgres) CreateOwnerIfNotExists(ctx context.Context, chatID msginfo.ChatID) (empl.EmployeeID, error) {
+	var ownerID empl.EmployeeID
 
 	if err := transaction.Transaction(ctx, p.db, true, func(ctx context.Context, tx sqlx.ExtContext) error {
 		if _, err := tx.ExecContext(ctx, `LOCK TABLE employee IN SHARE ROW EXCLUSIVE MODE`); err != nil {

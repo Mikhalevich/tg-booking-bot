@@ -8,7 +8,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/role"
 )
 
@@ -16,7 +16,7 @@ func (p *Postgres) CreateEmployee(
 	ctx context.Context,
 	r role.Role,
 	verificationCode string,
-) (port.EmployeeID, error) {
+) (empl.EmployeeID, error) {
 	var roleID int
 	if err := sqlx.GetContext(
 		ctx,
@@ -47,7 +47,7 @@ func (p *Postgres) CreateEmployee(
 		RETURNING id
 		`, map[string]any{
 			"role_id":           roleID,
-			"state":             port.EmployeeStateVerificationRequired,
+			"state":             empl.EmployeeStateVerificationRequired,
 			"verification_code": verificationCode,
 		})
 
@@ -60,5 +60,5 @@ func (p *Postgres) CreateEmployee(
 		return 0, fmt.Errorf("insert employee: %w", err)
 	}
 
-	return port.EmployeeIDFromInt(employeeID), nil
+	return empl.EmployeeIDFromInt(employeeID), nil
 }

@@ -6,17 +6,17 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 
-	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/tracing"
 )
 
-type Middleware func(next port.Handler) port.Handler
+type Middleware func(next msginfo.Handler) msginfo.Handler
 
 type Register interface {
-	AddExactTextRoute(pattern string, handler port.Handler)
-	AddDefaultTextHandler(handler port.Handler)
-	AddDefaultCallbackQueryHander(h port.Handler)
+	AddExactTextRoute(pattern string, handler msginfo.Handler)
+	AddDefaultTextHandler(handler msginfo.Handler)
+	AddDefaultCallbackQueryHander(h msginfo.Handler)
 	AddMiddleware(middleware Middleware)
 	MiddlewareGroup(fn func(r Register))
 }
@@ -44,7 +44,7 @@ func (r *Router) MiddlewareGroup(fn func(r Register)) {
 	fn(group)
 }
 
-func (r *Router) AddExactTextRoute(pattern string, handler port.Handler) {
+func (r *Router) AddExactTextRoute(pattern string, handler msginfo.Handler) {
 	r.bot.RegisterHandler(
 		bot.HandlerTypeMessageText,
 		pattern,
@@ -53,7 +53,7 @@ func (r *Router) AddExactTextRoute(pattern string, handler port.Handler) {
 	)
 }
 
-func (r *Router) AddDefaultTextHandler(h port.Handler) {
+func (r *Router) AddDefaultTextHandler(h msginfo.Handler) {
 	r.bot.RegisterHandler(
 		bot.HandlerTypeMessageText,
 		"",
@@ -62,7 +62,7 @@ func (r *Router) AddDefaultTextHandler(h port.Handler) {
 	)
 }
 
-func (r *Router) AddDefaultCallbackQueryHander(h port.Handler) {
+func (r *Router) AddDefaultCallbackQueryHander(h msginfo.Handler) {
 	r.bot.RegisterHandler(
 		bot.HandlerTypeCallbackQueryData,
 		"",
@@ -75,7 +75,7 @@ func (r *Router) AddMiddleware(m Middleware) {
 	r.middlewares = append(r.middlewares, m)
 }
 
-func (r *Router) wrapHandler(pattern string, h port.Handler) bot.HandlerFunc {
+func (r *Router) wrapHandler(pattern string, h msginfo.Handler) bot.HandlerFunc {
 	h = r.applyMiddleware(h)
 
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -104,7 +104,7 @@ func (r *Router) wrapHandler(pattern string, h port.Handler) bot.HandlerFunc {
 	}
 }
 
-func (r *Router) applyMiddleware(h port.Handler) port.Handler {
+func (r *Router) applyMiddleware(h msginfo.Handler) msginfo.Handler {
 	for i := len(r.middlewares) - 1; i >= 0; i-- {
 		h = r.middlewares[i](h)
 	}
@@ -112,32 +112,32 @@ func (r *Router) applyMiddleware(h port.Handler) port.Handler {
 	return h
 }
 
-func makeMsgInfoFromUpdate(u *models.Update) port.MessageInfo {
+func makeMsgInfoFromUpdate(u *models.Update) msginfo.Info {
 	if u.Message != nil {
-		return port.MessageInfo{
-			MessageID: port.MessageIDFromInt(u.Message.ID),
-			ChatID:    port.ChatIDFromInt(u.Message.Chat.ID),
+		return msginfo.Info{
+			MessageID: msginfo.MessageIDFromInt(u.Message.ID),
+			ChatID:    msginfo.ChatIDFromInt(u.Message.Chat.ID),
 			Text:      u.Message.Text,
 		}
 	}
 
 	if u.CallbackQuery != nil {
 		if u.CallbackQuery.Message.Message != nil {
-			return port.MessageInfo{
-				MessageID: port.MessageIDFromInt(u.CallbackQuery.Message.Message.ID),
-				ChatID:    port.ChatIDFromInt(u.CallbackQuery.Message.Message.Chat.ID),
+			return msginfo.Info{
+				MessageID: msginfo.MessageIDFromInt(u.CallbackQuery.Message.Message.ID),
+				ChatID:    msginfo.ChatIDFromInt(u.CallbackQuery.Message.Message.Chat.ID),
 				Data:      u.CallbackQuery.Data,
 			}
 		}
 
 		if u.CallbackQuery.Message.InaccessibleMessage != nil {
-			return port.MessageInfo{
-				MessageID: port.MessageIDFromInt(u.CallbackQuery.Message.InaccessibleMessage.MessageID),
-				ChatID:    port.ChatIDFromInt(u.CallbackQuery.Message.InaccessibleMessage.Chat.ID),
+			return msginfo.Info{
+				MessageID: msginfo.MessageIDFromInt(u.CallbackQuery.Message.InaccessibleMessage.MessageID),
+				ChatID:    msginfo.ChatIDFromInt(u.CallbackQuery.Message.InaccessibleMessage.Chat.ID),
 				Data:      u.CallbackQuery.Data,
 			}
 		}
 	}
 
-	return port.MessageInfo{}
+	return msginfo.Info{}
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/go-telegram/bot/models"
 
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-booking-bot/internal/infra/logger"
 )
 
@@ -24,8 +25,8 @@ func New(bot *bot.Bot) *messageSender {
 
 func (m *messageSender) ReplyText(
 	ctx context.Context,
-	chatID port.ChatID,
-	replyToMsgID port.MessageID,
+	chatID msginfo.ChatID,
+	replyToMsgID msginfo.MessageID,
 	text string,
 	buttons ...port.Button,
 ) {
@@ -66,8 +67,8 @@ func makeButtonsMarkup(buttons ...port.Button) models.ReplyMarkup {
 
 func (m *messageSender) ReplyTextMarkdown(
 	ctx context.Context,
-	chatID port.ChatID,
-	replyToMsgID port.MessageID,
+	chatID msginfo.ChatID,
+	replyToMsgID msginfo.MessageID,
 	text string,
 ) {
 	if _, err := m.bot.SendMessage(ctx, &bot.SendMessageParams{

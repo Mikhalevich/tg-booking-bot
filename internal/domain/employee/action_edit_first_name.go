@@ -9,11 +9,12 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/button"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
 func (e *employee) actionEditFirstName(
 	ctx context.Context,
-	msgInfo port.MessageInfo,
+	msgInfo msginfo.Info,
 	actionInfo action.ActionInfo,
 ) error {
 	emplID, err := actionpayload.EmployeeIDFromBytes(actionInfo.Payload)

@@ -1,4 +1,4 @@
-package port
+package msginfo
 
 import (
 	"context"
@@ -24,7 +24,7 @@ func ChatIDFromInt(id int64) ChatID {
 	return ChatID(id)
 }
 
-type MessageInfo struct {
+type Info struct {
 	MessageID MessageID
 	ChatID    ChatID
 	// for text message
@@ -33,4 +33,4 @@ type MessageInfo struct {
 	Data string
 }
 
-type Handler func(ctx context.Context, info MessageInfo) error
+type Handler func(ctx context.Context, info Info) error
