@@ -23,6 +23,7 @@ func (p *Postgres) GetEmployeeByChatID(ctx context.Context, chatID msginfo.ChatI
 			employee.id,
 			employee.first_name,
 			employee.last_name,
+			employee.role_id,
 			role.name AS role_name,
 			employee.chat_id,
 			employee.state,

@@ -13,6 +13,7 @@ type Employee struct {
 	ID               int                `db:"id"`
 	FirstName        string             `db:"first_name"`
 	LastName         string             `db:"last_name"`
+	RoleID           int                `db:"role_id"`
 	Role             role.Role          `db:"role_name"`
 	ChatID           sql.NullInt64      `db:"chat_id"`
 	State            empl.EmployeeState `db:"state"`

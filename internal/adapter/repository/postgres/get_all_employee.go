@@ -20,6 +20,7 @@ func (p *Postgres) GetAllEmployee(ctx context.Context) ([]empl.Employee, error) 
 			employee.id,
 			employee.first_name,
 			employee.last_name,
+			employee.role_id,
 			role.name AS role_name,
 			employee.chat_id,
 			employee.state,
