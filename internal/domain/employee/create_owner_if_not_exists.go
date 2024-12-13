@@ -60,7 +60,11 @@ func (e *employee) CreateOwnerIfNotExists(ctx context.Context, info msginfo.Info
 	}
 
 	e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
-		"Owner created. Please enter your first name",
+		"Owner created successfully",
+	)
+
+	e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
+		"Enter your first name",
 		button.CancelButton("Cancel", button.ActionData{
 			ID:   actionID,
 			Type: button.ActionTypeCancel,

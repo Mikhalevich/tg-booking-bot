@@ -9,6 +9,7 @@ import (
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/employee/internal/button"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/action"
+	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/empl"
 	"github.com/Mikhalevich/tg-booking-bot/internal/domain/port/msginfo"
 )
 
@@ -51,7 +52,11 @@ func (e *employee) actionEditFirstName(
 	}
 
 	e.sender.ReplyText(ctx, msgInfo.ChatID, msgInfo.MessageID,
-		"First name edited successfully. Please enter your first name",
+		"First name edited successfully",
+	)
+
+	e.sender.ReplyText(ctx, msgInfo.ChatID, msgInfo.MessageID,
+		enterLastNameText(actionInfo.EmployeeID, emplID.ID),
 		button.CancelButton("Cancel", button.ActionData{
 			ID:   actionID,
 			Type: button.ActionTypeCancel,
@@ -59,4 +64,12 @@ func (e *employee) actionEditFirstName(
 	)
 
 	return nil
+}
+
+func enterLastNameText(currentEmployeeID, employeeIDFromActionInfo empl.EmployeeID) string {
+	if currentEmployeeID == employeeIDFromActionInfo {
+		return "Enter your last name"
+	}
+
+	return "Enter employee last name"
 }
