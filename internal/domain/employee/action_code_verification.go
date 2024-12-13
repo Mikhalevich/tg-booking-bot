@@ -52,6 +52,11 @@ func (e *employee) actionCodeVerification(
 			return nil
 		},
 	); err != nil {
+		if e.repository.IsNotFoundError(err) {
+			e.sender.ReplyText(ctx, chatID, msgID, "no such verification code")
+			return nil
+		}
+
 		return fmt.Errorf("code verification transaction: %w", err)
 	}
 

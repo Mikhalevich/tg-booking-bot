@@ -65,7 +65,11 @@ func (e *employee) CreateEmployee(ctx context.Context, info msginfo.Info) error 
 	)
 
 	e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
-		"Employee created. Please enter employee first name",
+		"Employee created",
+	)
+
+	e.sender.ReplyText(ctx, info.ChatID, info.MessageID,
+		"Enter employee first name",
 		button.CancelButton("Cancel", button.ActionData{
 			ID:   editFirstNameActionID,
 			Type: button.ActionTypeCancel,
