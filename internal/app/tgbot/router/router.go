@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -19,6 +20,7 @@ type Register interface {
 	AddDefaultCallbackQueryHander(h msginfo.Handler)
 	AddMiddleware(middleware Middleware)
 	MiddlewareGroup(fn func(r Register))
+	SendMessage(ctx context.Context, chatID int64, msg string) error
 }
 
 type Router struct {
@@ -32,6 +34,17 @@ func New(b *bot.Bot, logger logger.Logger) *Router {
 		bot:    b,
 		logger: logger,
 	}
+}
+
+func (r *Router) SendMessage(ctx context.Context, chatID int64, msg string) error {
+	if _, err := r.bot.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   msg,
+	}); err != nil {
+		return fmt.Errorf("send message: %w", err)
+	}
+
+	return nil
 }
 
 func (r *Router) MiddlewareGroup(fn func(r Register)) {
